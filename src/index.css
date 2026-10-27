@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: #1a1a1a;
+    background-color: #fbfbf9;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-editorial {
+    font-family: var(--font-heading);
+  }
+
+  svg {
+    pointer-events: none;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1ede7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c7beaf;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9d9382;
+}
+
+/* Smooth Image hover effects */
+.img-zoom-wrapper {
+  overflow: hidden;
+}
+
+.img-zoom-wrapper img {
+  transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.img-zoom-wrapper:hover img {
+  transform: scale(1.06);
+}
+
+/* Luxury button styling */
+.btn-luxe-dark {
+  background-color: #171717;
+  color: #ffffff;
+  transition: all 0.25s ease;
+}
+
+.btn-luxe-dark:hover {
+  background-color: #383838;
+}
+
+.btn-luxe-outline {
+  border: 1px solid #171717;
+  color: #171717;
+  transition: all 0.25s ease;
+}
+
+.btn-luxe-outline:hover {
+  background-color: #171717;
+  color: #ffffff;
+}
