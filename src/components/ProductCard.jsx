@@ -1,8 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, Eye, Star } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, toggleWishlist, setDrawerOpen, selectWishlist } from '../redux/cart/cartSlice';
+import { selectCurrentUser } from '../redux/Auth/authSlice';
 import { showToast } from '../redux/ui/uiSlice';
 
 const formatCurrency = (val) =>
@@ -10,15 +11,22 @@ const formatCurrency = (val) =>
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const wishlist = useSelector(selectWishlist);
+  const currentUser = useSelector(selectCurrentUser);
   const productId = product._id || product.id;
   const wishlisted = wishlist.includes(String(productId));
 
   const handleAddToCart = () => {
+    if (!currentUser) {
+      dispatch(showToast({ message: 'Vui lòng đăng nhập để thêm vào giỏ hàng', type: 'info' }));
+      navigate('/auth');
+      return;
+    }
     dispatch(
       addToCart({
         product,
-        size: product.sizes?.[0] || 'M',
+        size: product.sizes?.[0] || 'Tiêu chuẩn',
         color: product.colors?.[0]?.name || 'Tiêu chuẩn',
         quantity: 1,
       })
@@ -33,6 +41,11 @@ const ProductCard = ({ product }) => {
   };
 
   const handleToggleWishlist = () => {
+    if (!currentUser) {
+      dispatch(showToast({ message: 'Vui lòng đăng nhập để lưu yêu thích', type: 'info' }));
+      navigate('/auth');
+      return;
+    }
     dispatch(toggleWishlist(productId));
     dispatch(
       showToast({
@@ -108,51 +121,72 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      {/* Product Information */}
-      <div className="p-4 flex flex-col grow justify-between">
-        <div>
-          <div className="flex items-center justify-between text-[11px] text-[#8C827A] uppercase tracking-wider mb-1">
-            <span>{product.categoryName || 'Thời trang'}</span>
-            <div className="flex items-center gap-1 text-[#C4883A]">
-              <Star size={11} fill="currentColor" />
-              <span className="font-semibold text-gray-700">{product.rating || 5}</span>
-              <span className="text-gray-400">({product.reviewCount || 12})</span>
-            </div>
-          </div>
-
-          <h3 className="font-normal text-sm sm:text-base text-[#1A1A1A] hover:text-[#8A5B36] transition-colors line-clamp-1">
-            <Link to={`/product/${productId}`}>{product.name}</Link>
-          </h3>
-        </div>
-
-        <div className="mt-3 pt-2 border-t border-[#F5F2EB] flex items-baseline justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className="text-sm sm:text-base font-semibold text-[#18181B]">
-              {formatCurrency(product.price)}
-            </span>
-            {product.originalPrice > product.price && (
-              <span className="text-xs text-gray-400 line-through">
-                {formatCurrency(product.originalPrice)}
+        {/* Product Information */}
+        <div className="p-4 flex flex-col grow justify-between">
+          <div>
+            <div className="flex items-center justify-between text-[11px] text-[#8C827A] uppercase tracking-wider mb-1.5">
+              <span className={`font-semibold px-2 py-0.5 rounded-xs text-[10px] ${
+                product.giftType === 'combo'
+                  ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                  : 'bg-stone-100 text-stone-700'
+              }`}>
+                {product.giftType === 'combo' ? '🎁 Hộp Quà Combo' : '✨ Quà Tặng Lẻ'}
               </span>
+              <div className="flex items-center gap-1 text-[#C4883A]">
+                <Star size={11} fill="currentColor" />
+                <span className="font-semibold text-gray-700">{product.rating || 5}</span>
+                <span className="text-gray-400">({product.reviewCount || 12})</span>
+              </div>
+            </div>
+
+            <h3 className="font-normal text-sm sm:text-base text-[#1A1A1A] hover:text-[#8A5B36] transition-colors line-clamp-1 font-serif">
+              <Link to={`/product/${productId}`}>{product.name}</Link>
+            </h3>
+
+            {/* If combo, show combo items teaser */}
+            {product.comboItems && product.comboItems.length > 0 && (
+              <p className="text-[11px] text-gray-500 mt-1 line-clamp-1 italic">
+                Bao gồm: {product.comboItems.map(i => i.name).join(', ')}
+              </p>
             )}
           </div>
 
-          {/* Color swatch dots */}
-          {product.colors && product.colors.length > 0 && (
-            <div className="flex items-center gap-1">
-              {product.colors.slice(0, 3).map((col, idx) => (
-                <span
-                  key={idx}
-                  className="w-2.5 h-2.5 rounded-full border border-gray-300"
-                  style={{ backgroundColor: typeof col === 'string' ? col : col.hex }}
-                  title={typeof col === 'string' ? col : col.name}
-                />
-              ))}
+          <div className="mt-3 pt-2 border-t border-[#F5F2EB]">
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm sm:text-base font-bold text-[#18181B]">
+                  {formatCurrency(product.price)}
+                </span>
+                {product.originalPrice > product.price && (
+                  <span className="text-xs text-gray-400 line-through">
+                    {formatCurrency(product.originalPrice)}
+                  </span>
+                )}
+              </div>
+              {product.discountPercent > 0 && (
+                <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-xs">
+                  -{product.discountPercent}%
+                </span>
+              )}
             </div>
-          )}
+
+            {/* Song song: Đã bán & Còn tồn */}
+            <div className="mt-2.5 pt-2 border-t border-dashed border-[#EFECE6] flex items-center justify-between text-[11px]">
+              <span className="flex items-center gap-1 text-gray-500">
+                <span>Đã bán:</span>
+                <strong className="text-gray-800 font-semibold">{product.soldCount ?? 0}</strong>
+              </span>
+              <span className="text-gray-300">|</span>
+              <span className="flex items-center gap-1 text-gray-500">
+                <span>Còn tồn:</span>
+                <strong className={(product.stock ?? 0) <= 5 ? "text-amber-700 font-bold" : "text-emerald-700 font-semibold"}>
+                  {product.stock ?? 0}
+                </strong>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 

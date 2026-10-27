@@ -10,12 +10,14 @@ import {
   FileText,
   X,
   Phone,
-  MapPin
+  MapPin,
+  Printer
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectOrders } from '../../redux/order/orderSlice';
 import { updateOrderStatusApi } from '../../redux/order/orderApi';
 import { showToast } from '../../redux/ui/uiSlice';
+import InvoiceModal from '../../components/InvoiceModal';
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
@@ -27,6 +29,7 @@ const AdminOrdersView = () => {
   const [activeStatusTab, setActiveStatusTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+  const [invoiceOrder, setInvoiceOrder] = useState(null);
 
   // Status mapping
   const statusTabs = [
@@ -208,12 +211,22 @@ const AdminOrdersView = () => {
                         </select>
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        <button
-                          onClick={() => setSelectedOrderDetails(order)}
-                          className="px-2.5 py-1 text-xs text-[#8A5B36] hover:bg-[#FAF5EE] border border-[#E8DFD0] rounded-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          Chi tiết
-                        </button>
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            onClick={() => setSelectedOrderDetails(order)}
+                            className="px-2.5 py-1 text-xs text-[#8A5B36] hover:bg-[#FAF5EE] border border-[#E8DFD0] rounded-xs font-semibold transition-colors cursor-pointer"
+                          >
+                            Chi tiết
+                          </button>
+                          <button
+                            onClick={() => setInvoiceOrder(order)}
+                            className="px-2.5 py-1 text-xs bg-[#FAF5EE] hover:bg-[#8A5B36] text-[#8A5B36] hover:text-white border border-[#E8DFD0] rounded-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                            title="In / Xuất hóa đơn bán lẻ quà tặng"
+                          >
+                            <Printer size={12} />
+                            <span>Hóa đơn</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -323,15 +336,31 @@ const AdminOrdersView = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setSelectedOrderDetails(null)}
-              className="w-full py-2.5 bg-[#18181B] hover:bg-black text-white text-xs uppercase tracking-wider font-semibold rounded-xs transition-colors"
-            >
-              Đóng Cửa Sổ
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setInvoiceOrder(selectedOrderDetails)}
+                className="flex-1 py-2.5 bg-[#8A5B36] hover:bg-[#724A2B] text-white text-xs uppercase tracking-wider font-semibold rounded-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Printer size={14} />
+                <span>In Hóa Đơn Bán Lẻ</span>
+              </button>
+              <button
+                onClick={() => setSelectedOrderDetails(null)}
+                className="py-2.5 px-6 border border-gray-300 text-gray-700 hover:border-black text-xs uppercase tracking-wider font-semibold rounded-xs transition-colors cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Invoice Modal (In & Xuất Hóa Đơn) */}
+      <InvoiceModal
+        isOpen={Boolean(invoiceOrder)}
+        order={invoiceOrder}
+        onClose={() => setInvoiceOrder(null)}
+      />
     </div>
   );
 };

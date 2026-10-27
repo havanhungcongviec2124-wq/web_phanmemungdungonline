@@ -1,6 +1,12 @@
 // productSlice.js — createSlice quản lý state sản phẩm
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchProductsApi, fetchProductByIdApi, updateProductApi } from './productApi';
+import {
+  fetchProductsApi,
+  fetchProductByIdApi,
+  updateProductApi,
+  createProductApi,
+  deleteProductApi
+} from './productApi';
 
 const initialState = {
   items: [],          // Danh sách sản phẩm hiển thị
@@ -74,12 +80,30 @@ const productSlice = createSlice({
         const updated = action.payload.product;
         if (updated) {
           state.items = state.items.map((p) =>
-            p._id === updated._id ? updated : p
+            p._id === updated._id || p.id === updated._id ? updated : p
           );
           if (state.selectedProduct?._id === updated._id) {
             state.selectedProduct = updated;
           }
         }
+      });
+
+    // createProductApi (Admin nhập hàng mới)
+    builder
+      .addCase(createProductApi.fulfilled, (state, action) => {
+        const created = action.payload.product;
+        if (created) {
+          state.items.unshift(created);
+          state.total += 1;
+        }
+      });
+
+    // deleteProductApi
+    builder
+      .addCase(deleteProductApi.fulfilled, (state, action) => {
+        const id = action.payload.id;
+        state.items = state.items.filter((p) => p._id !== id && p.id !== id);
+        state.total = Math.max(0, state.total - 1);
       });
   },
 });

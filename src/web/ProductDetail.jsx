@@ -28,6 +28,7 @@ import {
   setDrawerOpen,
   selectWishlist,
 } from '../redux/cart/cartSlice';
+import { selectCurrentUser } from '../redux/Auth/authSlice';
 import { showToast } from '../redux/ui/uiSlice';
 import { formatCurrency } from '../data/mockData';
 import ProductCard from '../components/ProductCard';
@@ -41,6 +42,7 @@ const ProductDetail = () => {
   const selectedProduct = useSelector(selectSelectedProduct);
   const loading = useSelector(selectProductLoading);
   const wishlist = useSelector(selectWishlist);
+  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
     if (products.length === 0) {
@@ -91,6 +93,11 @@ const ProductDetail = () => {
     .slice(0, 4);
 
   const handleAddToCart = () => {
+    if (!currentUser) {
+      dispatch(showToast({ message: 'Vui lòng đăng nhập để thêm vào giỏ hàng', type: 'info' }));
+      navigate('/auth');
+      return;
+    }
     dispatch(
       addToCart({
         product,
@@ -109,6 +116,11 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
+    if (!currentUser) {
+      dispatch(showToast({ message: 'Vui lòng đăng nhập để mua hàng', type: 'info' }));
+      navigate('/auth');
+      return;
+    }
     dispatch(
       addToCart({
         product,
@@ -121,6 +133,11 @@ const ProductDetail = () => {
   };
 
   const handleToggleWishlist = () => {
+    if (!currentUser) {
+      dispatch(showToast({ message: 'Vui lòng đăng nhập để lưu yêu thích', type: 'info' }));
+      navigate('/auth');
+      return;
+    }
     dispatch(toggleWishlist(productId));
     dispatch(
       showToast({
@@ -199,14 +216,25 @@ const ProductDetail = () => {
           <div className="lg:col-span-5 flex flex-col justify-start space-y-6">
             <div>
               <div className="flex items-center justify-between text-xs text-gray-500 uppercase tracking-widest mb-1.5">
-                <span className="font-semibold text-[#8A5B36]">{product.brand}</span>
+                <span className="font-semibold text-[#8A5B36]">{product.brand || 'LUXE GIFTS'}</span>
                 <button
                   onClick={handleShare}
-                  className="flex items-center gap-1 hover:text-black text-gray-400"
+                  className="flex items-center gap-1 hover:text-black text-gray-400 cursor-pointer"
                   title="Chia sẻ"
                 >
                   <Share2 size={14} /> Chia sẻ
                 </button>
+              </div>
+
+              {/* Gift Type Badge */}
+              <div className="mb-2">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xs text-xs font-bold uppercase tracking-wider ${
+                  product.giftType === 'combo'
+                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                    : 'bg-stone-100 text-stone-800 border border-stone-200'
+                }`}>
+                  {product.giftType === 'combo' ? '🎁 Hộp Quà Combo Trọn Gói' : '✨ Quà Tặng Lẻ Tinh Tuyển'}
+                </span>
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-serif font-normal text-gray-900 tracking-tight leading-snug">
@@ -222,7 +250,7 @@ const ProductDetail = () => {
                 <span className="text-gray-300">|</span>
                 <span className="text-gray-600 underline cursor-pointer">{product.reviewCount} đánh giá</span>
                 <span className="text-gray-300">|</span>
-                <span className="text-gray-500">Đã bán {product.soldCount}+</span>
+                <span className="text-gray-700 font-semibold">Đã bán {product.soldCount ?? 0} món</span>
               </div>
             </div>
 
@@ -243,70 +271,124 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Stock indicator */}
-            <div className="text-xs text-emerald-800 flex items-center gap-1.5 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Còn lại <strong>{product.stock} sản phẩm</strong> trong kho
-            </div>
+            {/* Song song: Đã bán & Tồn kho indicator */}
+            
 
-            {/* Color Selector */}
-            {product.colors && product.colors.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-gray-900 uppercase tracking-wider">
-                    MÀU SẮC: <span className="font-normal text-gray-600">{selectedColor}</span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => setSelectedColor(color.name)}
-                      className={`relative w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${
-                        selectedColor === color.name
-                          ? 'border-[#18181B] scale-110'
-                          : 'border-transparent hover:scale-105'
-                      }`}
-                      title={color.name}
+            {/* Phù hợp các dịp tặng quà */}
+            {product.occasions && product.occasions.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-700 block">
+                  Phù Hợp Làm Quà Tặng Cho Dịp:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {product.occasions.map((occId) => (
+                    <span
+                      key={occId}
+                      className="text-[11px] font-semibold bg-[#FAF5EE] text-[#8A5B36] border border-[#E8DFD0] px-2.5 py-1 rounded-xs"
                     >
-                      {selectedColor === color.name && (
-                        <Check size={14} className={color.name.toLowerCase().includes('trắng') ? 'text-black' : 'text-white'} />
-                      )}
-                    </button>
+                      {occId === 'cuoi' ? '💍 Cưới hỏi & Hỷ sự' :
+                       occId === 'sinh-nhat' ? '🎂 Sinh nhật' :
+                       occId === 'tan-gia' ? '🏡 Mừng tân gia' :
+                       occId === 'ky-niem' ? '💖 Kỷ niệm & Tình yêu' :
+                       occId === 'doanh-nghiep' ? '👔 Tri ân đối tác / Sếp' : occId}
+                    </span>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Size Selector */}
+            {/* Chi tiết các món bên trong Combo (Requirement 6, 7, 10) */}
+            {product.comboItems && product.comboItems.length > 0 && (
+              <div className="p-4 bg-amber-50/60 border border-amber-200/80 rounded-xs space-y-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                  <Gift size={14} className="text-[#8A5B36]" />
+                  Bên Trong Hộp Quà Combo Gồm Có:
+                </span>
+                <ul className="space-y-1.5 divide-y divide-amber-100">
+                  {product.comboItems.map((item, idx) => (
+                    <li key={idx} className="pt-1.5 first:pt-0 flex items-start justify-between text-xs">
+                      <div>
+                        <strong className="text-gray-900 font-semibold">• {item.name}</strong>
+                        {item.desc && <span className="text-gray-500 text-[11px] block ml-2">({item.desc})</span>}
+                      </div>
+                      <span className="text-xs font-mono font-bold text-amber-800 shrink-0">x{item.quantity}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="text-[11px] text-[#8A5B36] font-medium pt-1">
+                  ✨ {product.giftBox || 'Tặng kèm hộp quà sang trọng, ruy băng lụa & thiệp viết tay miễn phí'}
+                </div>
+              </div>
+            )}
+
+            {/* ── Chọn Màu sắc (chỉ hiện khi sản phẩm có màu) ── */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700">
+                    Màu Sắc:
+                  </span>
+                  <span className="text-xs text-[#8A5B36] font-semibold">
+                    {selectedColor}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((c) => {
+                    const colorName = c?.name || c;
+                    const colorHex  = c?.hex  || '#ccc';
+                    const isSelected = selectedColor === colorName;
+                    return (
+                      <button
+                        key={colorName}
+                        onClick={() => setSelectedColor(colorName)}
+                        title={colorName}
+                        className={`w-8 h-8 rounded-full border-2 transition-all duration-150 ${
+                          isSelected
+                            ? 'border-[#8A5B36] ring-2 ring-[#8A5B36]/40 scale-110'
+                            : 'border-gray-300 hover:border-gray-500'
+                        }`}
+                        style={{ backgroundColor: colorHex }}
+                        aria-label={colorName}
+                        aria-pressed={isSelected}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── Chọn Kích thước / Size (chỉ hiện khi sản phẩm có size) ── */}
             {product.sizes && product.sizes.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-gray-900 uppercase tracking-wider">
-                    KÍCH CỠ: <span className="font-normal text-gray-600">{selectedSize}</span>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700">
+                    Kích Thước / Size:
                   </span>
                   <button
                     onClick={() => setIsSizeGuideOpen(true)}
-                    className="flex items-center gap-1 text-[#8A5B36] font-semibold hover:underline"
+                    className="text-[11px] text-[#8A5B36] underline hover:no-underline font-medium"
                   >
-                    <Ruler size={13} />
-                    Hướng dẫn chọn size
+                    Bảng quy đổi kích thước →
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2.5">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`min-w-11 h-10 px-3 text-xs font-semibold uppercase border transition-all rounded-xs ${
-                        selectedSize === size
-                          ? 'bg-[#18181B] text-white border-[#18181B]'
-                          : 'bg-white text-gray-800 border-gray-300 hover:border-black'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((sz) => {
+                    const isSelected = selectedSize === sz;
+                    return (
+                      <button
+                        key={sz}
+                        onClick={() => setSelectedSize(sz)}
+                        className={`px-3.5 py-2 text-xs font-semibold border transition-all duration-150 rounded-xs ${
+                          isSelected
+                            ? 'bg-[#18181B] text-white border-[#18181B] shadow-sm'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-gray-700 hover:bg-gray-50'
+                        }`}
+                        aria-pressed={isSelected}
+                      >
+                        {sz}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -317,7 +399,7 @@ const ProductDetail = () => {
                 <div className="flex items-center border border-gray-300 bg-white">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 flex-1 items-center justify-center hover:bg-gray-100 text-gray-600 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-gray-600 transition-colors"
                     aria-label="Giảm"
                   >
                     <Minus size={14} />
@@ -366,7 +448,15 @@ const ProductDetail = () => {
                 <Heart size={18} fill={wishlisted ? 'currentColor' : 'none'} />
               </button>
             </div>
-
+            <div className="p-3 bg-[#FAF8F5] border border-[#ECE7DF] rounded-xs flex items-center justify-between text-xs">
+              <div className="text-gray-700 font-medium">
+                Đã bán được: <strong className="text-gray-900 font-bold">{product.soldCount ?? 0} sản phẩm</strong>
+              </div>
+              <div className="text-emerald-800 flex items-center gap-1.5 font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Còn tồn kho: <strong>{product.stock ?? 20} hộp có sẵn</strong>
+              </div>
+            </div>
             {/* Policy highlights */}
             <div className="pt-4 border-t border-[#ECE7DF] grid grid-cols-1 gap-2.5 text-xs text-gray-600">
               <div className="flex items-center gap-2.5">

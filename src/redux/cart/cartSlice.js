@@ -1,37 +1,101 @@
-// cartSlice.js — Quản lý giỏ hàng (local state, persist vào localStorage)
+// cartSlice.js — Giỏ hàng riêng cho từng tài khoản (theo userId)
 import { createSlice } from '@reduxjs/toolkit';
 
-const loadCart = () => {
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+// Tạo localStorage key riêng cho từng user
+const getCartKey = (userId) =>
+  userId ? `luxe_cart_${userId}` : 'luxe_cart_guest';
+
+const getWishlistKey = (userId) =>
+  userId ? `luxe_wishlist_${userId}` : 'luxe_wishlist_guest';
+
+// Lấy userId từ localStorage (nếu đã đăng nhập trước đó)
+const getSavedUserId = () => {
   try {
-    const saved = localStorage.getItem('luxe_cart');
+    const saved = localStorage.getItem('luxe_user');
+    if (saved) {
+      const user = JSON.parse(saved);
+      return user?.id || user?._id || null;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+};
+
+const loadCartForId = (userId) => {
+  try {
+    const key = getCartKey(userId);
+    const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : [];
   } catch {
     return [];
   }
 };
 
-const loadWishlist = () => {
+const loadWishlistForId = (userId) => {
   try {
-    const saved = localStorage.getItem('luxe_wishlist');
+    const key = getWishlistKey(userId);
+    const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : [];
   } catch {
     return [];
   }
 };
+
+// Khởi tạo state theo user đang đăng nhập (nếu có)
+const savedUserId = getSavedUserId();
 
 const initialState = {
-  items: loadCart(),
-  wishlist: loadWishlist(),
+  userId: savedUserId,          // userId hiện tại để ghi đúng key
+  items: loadCartForId(savedUserId),
+  wishlist: loadWishlistForId(savedUserId),
   isDrawerOpen: false,
 };
+
+// ─── Helpers lưu state ───────────────────────────────────────────────────────
+
+const saveCartToStorage = (userId, items) => {
+  try {
+    localStorage.setItem(getCartKey(userId), JSON.stringify(items));
+  } catch {
+    // ignore
+  }
+};
+
+const saveWishlistToStorage = (userId, wishlist) => {
+  try {
+    localStorage.setItem(getWishlistKey(userId), JSON.stringify(wishlist));
+  } catch {
+    // ignore
+  }
+};
+
+// ─── Slice ───────────────────────────────────────────────────────────────────
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    // Gọi sau khi đăng nhập / đăng xuất để nạp đúng giỏ hàng của user đó
+    loadCartForUser: (state, action) => {
+      const userId = action.payload || null; // null = guest
+      state.userId = userId;
+      state.items = loadCartForId(userId);
+      state.wishlist = loadWishlistForId(userId);
+    },
+
+    // Xóa cart khỏi memory khi logout (dữ liệu vẫn giữ trong localStorage)
+    clearCartFromMemory: (state) => {
+      state.userId = null;
+      state.items = [];
+      state.wishlist = [];
+    },
+
     // Thêm sản phẩm vào giỏ
     addToCart: (state, action) => {
-      const { product, size = 'M', color = 'Be', quantity = 1 } = action.payload;
+      const { product, size = 'Tiêu chuẩn', color = 'Tiêu chuẩn', quantity = 1 } = action.payload;
       const pId = product._id || product.id;
       const existIdx = state.items.findIndex(
         (item) => item.id === pId && item.size === size && item.color === color
@@ -50,9 +114,10 @@ const cartSlice = createSlice({
           quantity,
           image: product.images?.[0] || '',
           categoryName: product.categoryName,
+          giftType: product.giftType || 'single',
         });
       }
-      localStorage.setItem('luxe_cart', JSON.stringify(state.items));
+      saveCartToStorage(state.userId, state.items);
     },
 
     // Cập nhật số lượng theo index
@@ -64,19 +129,19 @@ const cartSlice = createSlice({
       } else {
         state.items[index].quantity = newQty;
       }
-      localStorage.setItem('luxe_cart', JSON.stringify(state.items));
+      saveCartToStorage(state.userId, state.items);
     },
 
     // Xóa sản phẩm theo index
     removeFromCart: (state, action) => {
       state.items.splice(action.payload, 1);
-      localStorage.setItem('luxe_cart', JSON.stringify(state.items));
+      saveCartToStorage(state.userId, state.items);
     },
 
-    // Xóa toàn bộ giỏ hàng
+    // Xóa toàn bộ giỏ hàng (sau khi đặt hàng xong)
     clearCart: (state) => {
       state.items = [];
-      localStorage.removeItem('luxe_cart');
+      saveCartToStorage(state.userId, []);
     },
 
     // Toggle wishlist
@@ -88,7 +153,7 @@ const cartSlice = createSlice({
       } else {
         state.wishlist.push(id);
       }
-      localStorage.setItem('luxe_wishlist', JSON.stringify(state.wishlist));
+      saveWishlistToStorage(state.userId, state.wishlist);
     },
 
     // Mở / đóng drawer giỏ hàng
@@ -99,6 +164,8 @@ const cartSlice = createSlice({
 });
 
 export const {
+  loadCartForUser,
+  clearCartFromMemory,
   addToCart,
   updateQuantity,
   removeFromCart,
@@ -107,14 +174,13 @@ export const {
   setDrawerOpen,
 } = cartSlice.actions;
 
-// ─── Selectors ─────────────────────────────────────────────────────────────
+// ─── Selectors ───────────────────────────────────────────────────────────────
 export const selectCartItems = (state) => state.cart.items;
 export const selectWishlist = (state) => state.cart.wishlist;
 export const selectIsDrawerOpen = (state) => state.cart.isDrawerOpen;
 export const selectIsWishlisted = (productId) => (state) =>
   state.cart.wishlist.includes(String(productId));
 
-// Tính toán (derived state)
 export const selectTotalItemsCount = (state) =>
   state.cart.items.reduce((acc, item) => acc + item.quantity, 0);
 

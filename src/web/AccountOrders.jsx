@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Package, Heart, MapPin, User, LogOut, CheckCircle2, Clock, Truck, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Package, Heart, MapPin, User, LogOut, CheckCircle2, Clock, Truck, ChevronRight, ShieldCheck, Printer } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectOrders } from '../redux/order/orderSlice';
 import { fetchOrdersApi } from '../redux/order/orderApi';
@@ -11,6 +11,7 @@ import { selectCurrentUser, logout } from '../redux/Auth/authSlice';
 import { showToast } from '../redux/ui/uiSlice';
 import { formatCurrency } from '../data/mockData';
 import ProductCard from '../components/ProductCard';
+import InvoiceModal from '../components/InvoiceModal';
 
 const AccountOrders = () => {
   const [searchParams] = useSearchParams();
@@ -19,6 +20,7 @@ const AccountOrders = () => {
 
   const initialTab = searchParams.get('tab') || 'orders';
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [invoiceOrder, setInvoiceOrder] = useState(null);
 
   const orders = useSelector(selectOrders);
   const wishlist = useSelector(selectWishlist);
@@ -240,9 +242,16 @@ const AccountOrders = () => {
 
                         {/* Order Footer */}
                         <div className="pt-3 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                          <span className="text-[11px] text-gray-500">
-                            Phương thức: <strong>{order.paymentMethod}</strong>
-                          </span>
+                          <div className="flex items-center gap-4 text-[11px] text-gray-500">
+                            <span>Phương thức: <strong>{order.paymentMethod}</strong></span>
+                            <button
+                              onClick={() => setInvoiceOrder(order)}
+                              className="text-[#8A5B36] hover:text-black font-semibold flex items-center gap-1 cursor-pointer underline"
+                            >
+                              <Printer size={12} />
+                              In Hóa Đơn
+                            </button>
+                          </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-600">Tổng thanh toán:</span>
                             <span className="text-base font-bold text-[#18181B]">{formatCurrency(order.total)}</span>
@@ -317,6 +326,13 @@ const AccountOrders = () => {
           </div>
         </div>
       </div>
+
+      {/* Invoice Modal */}
+      <InvoiceModal
+        isOpen={Boolean(invoiceOrder)}
+        order={invoiceOrder}
+        onClose={() => setInvoiceOrder(null)}
+      />
     </div>
   );
 };

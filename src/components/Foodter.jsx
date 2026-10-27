@@ -27,12 +27,11 @@ const Foodter = () => {
           <div className="space-y-4">
             <Link to="/" className="inline-block">
               <span className="text-2xl font-bold tracking-[0.25em] text-white font-serif uppercase">
-                LUXE<span className="font-light text-[#D4AF37] ml-1">STORE</span>
+                LUXE<span className="font-light text-[#D4AF37] ml-1">GIFTS</span>
               </span>
             </Link>
             <p className="text-xs leading-relaxed text-[#9CA3AF] max-w-sm">
-              Thương hiệu thời trang tối giản sang trọng phong cách sống hiện đại.
-              Tinh tế trong từng đường kim mũi chỉ, hướng tới vẻ đẹp thanh lịch bền vững vượt thời gian.
+              Thế giới quà tặng tinh tế & hộp quà combo cao cấp. Trao gửi trọn vẹn yêu thương và lòng tri ân trong từng dịp đặc biệt: Cưới hỏi, Sinh nhật, Tân gia, Kỷ niệm & Tri ân đối tác.
             </p>
             <div className="flex items-center space-x-3 pt-2">
               <a
@@ -65,50 +64,50 @@ const Foodter = () => {
             </div>
           </div>
 
-          {/* Col 2: MUA SẮM */}
+          {/* Col 2: QUÀ TẶNG & DANH MỤC */}
           <div>
             <h4 className="text-xs font-bold tracking-widest uppercase text-white mb-5 font-sans">
-              MUA SẮM
+              DANH MỤC QUÀ
             </h4>
             <ul className="space-y-2.5 text-xs">
               <li>
-                <Link to="/products" className="hover:text-white transition-colors">Tất cả sản phẩm</Link>
+                <Link to="/products?giftType=combo" className="text-amber-400 font-semibold hover:text-white transition-colors">🎁 Hộp Quà Combo Độc Bản</Link>
               </li>
               <li>
-                <Link to="/products?tag=bestseller" className="hover:text-white transition-colors">Bán chạy nhất</Link>
+                <Link to="/products?giftType=single" className="hover:text-white transition-colors">✨ Quà Tặng Lẻ Tinh Tế</Link>
               </li>
               <li>
-                <Link to="/products?tag=new" className="hover:text-white transition-colors">Hàng mới về</Link>
+                <Link to="/products?category=nen-thom" className="hover:text-white transition-colors">🌿 Nến Thơm & Tinh Dầu</Link>
               </li>
               <li>
-                <Link to="/products?category=ao" className="hover:text-white transition-colors">Áo Blazer & Khoác</Link>
+                <Link to="/products?category=gom-su" className="hover:text-white transition-colors">🏺 Gốm Sứ & Pha Lê</Link>
               </li>
               <li>
-                <Link to="/products?category=vay" className="hover:text-white transition-colors">Đầm Lụa Thiết Kế</Link>
+                <Link to="/products?category=but-ky" className="hover:text-white transition-colors">🖋️ Bút Ký & Sổ Da Khắc Tên</Link>
               </li>
               <li>
-                <Link to="/products?tag=sale" className="text-rose-400 hover:text-rose-300 transition-colors">Ưu đãi giảm giá</Link>
+                <Link to="/products?tag=bestseller" className="hover:text-white transition-colors">🔥 Quà Tặng Bán Chạy Nhất</Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: HỖ TRỢ */}
+          {/* Col 3: DỊCH VỤ & HỖ TRỢ */}
           <div>
             <h4 className="text-xs font-bold tracking-widest uppercase text-white mb-5 font-sans">
-              HỖ TRỢ
+              DỊCH VỤ QUÀ TẶNG
             </h4>
             <ul className="space-y-2.5 text-xs">
               <li>
-                <Link to="/contact" className="hover:text-white transition-colors">Chính sách đổi trả 30 ngày</Link>
+                <Link to="/contact" className="hover:text-white transition-colors">Gói quà nghệ thuật & Thiệp tay</Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-white transition-colors">Chính sách vận chuyển</Link>
+                <Link to="/contact" className="hover:text-white transition-colors">Giao quà hỏa tốc hẹn giờ</Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-white transition-colors">Hướng dẫn chọn size</Link>
+                <Link to="/contact" className="hover:text-white transition-colors">Quà tặng sự kiện & Doanh nghiệp (B2B)</Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-white transition-colors">Câu hỏi thường gặp (FAQ)</Link>
+                <Link to="/account/orders" className="hover:text-white transition-colors">Tra cứu đơn hàng & In hóa đơn</Link>
               </li>
               <li>
                 <Link to="/admin" className="text-amber-400 hover:text-amber-300 transition-colors">Hệ thống quản trị (Admin)</Link>
@@ -119,10 +118,10 @@ const Foodter = () => {
           {/* Col 4: ĐĂNG KÝ NHẬN TIN */}
           <div>
             <h4 className="text-xs font-bold tracking-widest uppercase text-white mb-5 font-sans">
-              ĐĂNG KÝ NHẬN TIN
+              ƯU ĐÃI & BẢN TIN QUÀ TẶNG
             </h4>
             <p className="text-xs leading-relaxed text-[#9CA3AF] mb-4">
-              Nhận thông tin cập nhật về các bộ sưu tập mới nhất và ưu đãi độc quyền sớm nhất từ LUXE.
+              Nhận ngay gợi ý quà tặng theo các dịp lễ trong năm và mã giảm giá 10% cho đơn hàng đầu tiên.
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <div className="relative">
@@ -151,13 +150,13 @@ const Foodter = () => {
 
         {/* Bottom bar */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-[11px] text-[#71717A] gap-4">
-          <p>© 2026 LUXE STORE. Thiết kế và bản quyền thuộc về LUXE. All rights reserved.</p>
+          <p>© 2026 LUXE GIFTS. Hệ thống quà tặng tinh tế và hộp quà combo cao cấp. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
-              <MapPin size={12} /> Quận 1, TP. Hồ Chí Minh, Việt Nam
+              <MapPin size={12} /> Showroom Quà Tặng: Quận 1, TP. Hồ Chí Minh
             </span>
             <span className="flex items-center gap-1.5">
-              <Phone size={12} /> 1800 6868
+              <Phone size={12} /> Hotline Tư Vấn Quà: 1800 6868
             </span>
           </div>
         </div>

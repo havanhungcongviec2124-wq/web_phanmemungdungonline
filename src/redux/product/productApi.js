@@ -50,7 +50,7 @@ export const fetchProductByIdApi = createAsyncThunk(
   }
 );
 
-// Cập nhật sản phẩm — chủ yếu dùng cho Admin cập nhật tồn kho
+// Cập nhật sản phẩm — chủ yếu dùng cho Admin cập nhật tồn kho & sửa thông tin
 export const updateProductApi = createAsyncThunk(
   'product/update',
   async ({ id, ...productData }, { rejectWithValue }) => {
@@ -63,6 +63,43 @@ export const updateProductApi = createAsyncThunk(
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Lỗi cập nhật sản phẩm');
       return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// Tạo sản phẩm mới (Admin nhập hàng mới)
+export const createProductApi = createAsyncThunk(
+  'product/create',
+  async (productData, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${BASE_URL}/products`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(productData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Lỗi thêm sản phẩm mới');
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// Xóa sản phẩm
+export const deleteProductApi = createAsyncThunk(
+  'product/delete',
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${BASE_URL}/products/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Lỗi xóa sản phẩm');
+      return { id, ...data };
     } catch (err) {
       return rejectWithValue(err.message);
     }

@@ -8,7 +8,9 @@ import {
   Menu,
   X,
   ChevronDown,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Gift
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectTotalItemsCount, selectWishlist, setDrawerOpen } from '../redux/cart/cartSlice';
@@ -16,6 +18,7 @@ import { selectCategories } from '../redux/category/categorySlice';
 import { selectProducts } from '../redux/product/productSlice';
 import { selectCurrentUser } from '../redux/Auth/authSlice';
 import { formatCurrency } from '../data/mockData';
+import GiftAdvisorModal from './GiftAdvisorModal';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -29,6 +32,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,26 +92,35 @@ const Header = () => {
           <div className="shrink-0 flex items-center">
             <Link to="/" className="inline-block group whitespace-nowrap">
               <span className="text-2xl sm:text-2xl lg:text-3xl font-extrabold tracking-[0.22em] text-[#18181B] font-serif uppercase">
-                LUXE<span className="font-light text-[#8A5B36] ml-1">STORE</span>
+                LUXE<span className="font-light text-[#8A5B36] ml-1">GIFTS</span>
               </span>
             </Link>
           </div>
 
           {/* Center: Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.14em] text-gray-800 shrink-0">
+          <nav className="hidden lg:flex items-center space-x-5 xl:space-x-7 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.14em] text-gray-800 shrink-0">
             <Link
-              to="/products?tag=collection"
-              className="whitespace-nowrap hover:text-[#8A5B36] transition-colors py-2"
+              to="/products?giftType=combo"
+              className="whitespace-nowrap hover:text-[#8A5B36] transition-colors py-2 flex items-center gap-1.5"
             >
-              BỘ SƯU TẬP
+              <span>🎁 HỘP QUÀ COMBO</span>
             </Link>
 
             <Link
-              to="/products?tag=new"
-              className="whitespace-nowrap hover:text-[#8A5B36] transition-colors py-2"
+              to="/products?giftType=single"
+              className="whitespace-nowrap hover:text-[#8A5B36] transition-colors py-2 flex items-center gap-1.5"
             >
-              SẢN PHẨM MỚI
+              <span>✨ QUÀ LẺ</span>
             </Link>
+
+            {/* Smart Advisor Trigger */}
+            <button
+              onClick={() => setIsAdvisorOpen(true)}
+              className="whitespace-nowrap text-[#8A5B36] hover:text-[#5E3A1E] transition-colors py-2 flex items-center gap-1 font-bold cursor-pointer"
+            >
+              <Sparkles size={14} />
+              <span>GỢI Ý THEO DỊP</span>
+            </button>
 
             {/* Categories dropdown */}
             <div
@@ -119,14 +132,14 @@ const Header = () => {
                 to="/products"
                 className="whitespace-nowrap hover:text-[#8A5B36] transition-colors py-2 flex items-center gap-1"
               >
-                DANH MỤC
+                DANH MỤC QUÀ
                 <ChevronDown size={14} />
               </Link>
 
               {isCategoryDropdownOpen && (
                 <div className="absolute top-full left-0 w-64 bg-white border border-[#EBE6DE] shadow-xl p-3 grid grid-cols-1 gap-1 z-50">
                   <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 tracking-wider">
-                    PHÂN LOẠI THỜI TRANG
+                    CHỦNG LOẠI QUÀ TẶNG
                   </div>
                   {categories.map(cat => (
                     <Link
@@ -135,7 +148,7 @@ const Header = () => {
                       className="px-3 py-2 text-xs font-medium text-gray-700 hover:bg-[#F8F5EE] hover:text-[#8A5B36] flex items-center justify-between transition-colors"
                     >
                       <span>{cat.name}</span>
-                      <span className="text-[10px] text-gray-400">({cat.productCount || 0})</span>
+                      <span className="text-[10px] text-gray-400">({cat.count || 20})</span>
                     </Link>
                   ))}
                   <div className="border-t border-gray-100 mt-2 pt-2">
@@ -143,7 +156,7 @@ const Header = () => {
                       to="/products"
                       className="px-3 py-1.5 text-xs font-semibold text-[#18181B] hover:text-[#8A5B36] flex items-center gap-1"
                     >
-                      Xem tất cả <ArrowRight size={12} />
+                      Xem tất cả quà tặng <ArrowRight size={12} />
                     </Link>
                   </div>
                 </div>
@@ -316,6 +329,12 @@ const Header = () => {
           </div>
         </div>
       )}
+
+      {/* Gift Advisor Modal */}
+      <GiftAdvisorModal
+        isOpen={isAdvisorOpen}
+        onClose={() => setIsAdvisorOpen(false)}
+      />
     </header>
   );
 };

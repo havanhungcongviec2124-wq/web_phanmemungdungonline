@@ -36,13 +36,21 @@ const AdminReportsView = () => {
     { day: '18', rev: 24500000, height: '100%' },
   ];
 
-  // Category shares
+  // Category shares for gifts
   const categoryShare = [
-    { name: 'Áo Blazer & Khoác', percent: 40, amount: 98272000, color: '#8A5B36' },
-    { name: 'Đầm Lụa Thiết Kế', percent: 25, amount: 61420000, color: '#A06C42' },
-    { name: 'Túi Da & Phụ Kiện', percent: 20, amount: 49136000, color: '#C49770' },
-    { name: 'Quần & Chân Váy', percent: 10, amount: 24568000, color: '#D9B99B' },
-    { name: 'Khác', percent: 5, amount: 12284000, color: '#EBE2D5' },
+    { name: 'Hộp Quà & Combo Quà Tặng', percent: 45, amount: 110556000, color: '#8A5B36' },
+    { name: 'Nến Thơm & Tinh Dầu Cao Cấp', percent: 22, amount: 54049600, color: '#A06C42' },
+    { name: 'Gốm Sứ & Pha Lê Tinh Xảo', percent: 18, amount: 44222400, color: '#C49770' },
+    { name: 'Bút Ký & Sổ Da Doanh Nhân', percent: 10, amount: 24568000, color: '#D9B99B' },
+    { name: 'Decor & Phụ Kiện Quà Tặng', percent: 5, amount: 12284000, color: '#EBE2D5' },
+  ];
+
+  // Occasion shares (Phân tích theo dịp tặng)
+  const occasionShare = [
+    { occasion: 'Sinh Nhật', percent: 35, orders: 55, amount: 86000000 },
+    { occasion: 'Cưới Hỏi & Kỷ Niệm', percent: 28, orders: 44, amount: 68800000 },
+    { occasion: 'Tân Gia Nhà Mới', percent: 20, orders: 31, amount: 49100000 },
+    { occasion: 'Tri Ân Đối Tác / B2B', percent: 17, orders: 26, amount: 41780000 },
   ];
 
   // Payment channel shares
@@ -158,6 +166,34 @@ const AdminReportsView = () => {
                     className="h-full rounded-full transition-all duration-500"
                     style={{ width: `${cat.percent}%`, backgroundColor: cat.color }}
                   />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Occasions Breakdown */}
+        <div className="bg-white border border-[#ECE7DF] rounded-xs shadow-xs p-6 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+            <h3 className="text-sm font-bold text-gray-900 tracking-wide">
+              Phân Bổ Doanh Số Theo Dịp / Sự Kiện
+            </h3>
+            <span className="text-xs text-gray-500">Dịp tặng quà</span>
+          </div>
+
+          <div className="space-y-4">
+            {occasionShare.map((occ, idx) => (
+              <div key={idx} className="p-3.5 bg-[#FAF8F5] border border-gray-200 rounded-xs space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-gray-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#8A5B36]" />
+                    {occ.occasion}
+                  </span>
+                  <span className="font-bold text-[#8A5B36]">{occ.percent}%</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-gray-500">
+                  <span>Số đơn hàng: {occ.orders} đơn</span>
+                  <span>Doanh thu: {formatCurrency(occ.amount)}</span>
                 </div>
               </div>
             ))}

@@ -1,18 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShieldCheck, Truck, RefreshCw, Sparkles, Award } from 'lucide-react';
+import {
+  ArrowRight,
+  ShieldCheck,
+  Truck,
+  RefreshCw,
+  Sparkles,
+  Gift,
+  Heart,
+  Calendar,
+  CheckCircle2,
+  DollarSign,
+  Filter
+} from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import GiftAdvisorModal from '../components/GiftAdvisorModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectProducts } from '../redux/product/productSlice';
 import { fetchProductsApi } from '../redux/product/productApi';
 import { selectCategories } from '../redux/category/categorySlice';
 import { fetchCategoriesApi } from '../redux/category/categoryApi';
-import { CATEGORIES, PRODUCTS } from '../data/mockData';
+import { CATEGORIES, PRODUCTS, OCCASIONS, PRICE_RANGES, GIFT_TYPES } from '../data/mockData';
 
 const Home = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
+
+  // Modal Trợ lý chọn quà
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
+  // Widget gợi ý quà trực tiếp trên trang chủ
+  const [widgetOccasion, setWidgetOccasion] = useState('all');
+  const [widgetPrice, setWidgetPrice] = useState('all');
+  const [widgetGiftType, setWidgetGiftType] = useState('all');
 
   React.useEffect(() => {
     if (products.length === 0) dispatch(fetchProductsApi());
@@ -22,59 +43,65 @@ const Home = () => {
   const displayProducts = products.length > 0 ? products : PRODUCTS;
   const displayCategories = categories.length > 0 ? categories : CATEGORIES;
 
-  const newProducts = displayProducts.filter(p => p.isNew).slice(0, 4).length > 0
-    ? displayProducts.filter(p => p.isNew).slice(0, 4)
-    : displayProducts.slice(1, 5);
+  // Lọc theo widget tương tác
+  const priceFilter = PRICE_RANGES.find(p => p.id === widgetPrice) || PRICE_RANGES[0];
+  const suggestedGifts = displayProducts.filter(p => {
+    if (widgetOccasion !== 'all' && !p.occasions?.includes(widgetOccasion)) return false;
+    if (p.price < priceFilter.min || p.price > priceFilter.max) return false;
+    if (widgetGiftType !== 'all' && p.giftType !== widgetGiftType) return false;
+    return true;
+  });
 
-  const bestSellers = displayProducts.filter(p => p.isBestSeller).slice(0, 4).length > 0
-    ? displayProducts.filter(p => p.isBestSeller).slice(0, 4)
-    : displayProducts.slice(5, 9);
+  // Nhóm quà Combo & Quà Lẻ
+  const comboGifts = displayProducts.filter(p => p.giftType === 'combo').slice(0, 4);
+  const singleGifts = displayProducts.filter(p => p.giftType === 'single').slice(0, 4);
+  const bestSellers = displayProducts.filter(p => p.isBestSeller).slice(0, 4);
 
   return (
     <div className="bg-[#FAF9F6] text-[#1E1E1E]">
-      {/* 1. HERO BANNER (Exact Figma home-page hero) */}
-      <section className="relative w-full h-[75vh] min-h-130 max-h-195 bg-[#222] overflow-hidden">
-        {/* Background Editorial Image */}
+      {/* 1. HERO BANNER */}
+      <section className="relative w-full h-[75vh] min-h-130 max-h-195 bg-[#1B1917] overflow-hidden">
+        {/* Background Editorial Gift Image */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop"
-            alt="Bộ Sưu Tập Mùa Thu 2026"
-            className="w-full h-full object-cover object-[center_35%] filter brightness-[0.82] contrast-[1.05] transition-transform duration-1000 scale-100 hover:scale-102"
+            src="https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=2000&auto=format&fit=crop"
+            alt="LUXE GIFTS - Quà Tặng & Combo Tinh Tế"
+            className="w-full h-full object-cover object-[center_35%] filter brightness-[0.72] contrast-[1.05] transition-transform duration-1000 scale-100 hover:scale-102"
           />
-          {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/45 to-transparent" />
         </div>
 
         {/* Content Box */}
         <div className="relative max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center">
           <div className="max-w-xl text-white space-y-5 animate-fade-in">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md border border-white/25 text-[11px] uppercase tracking-[0.25em] font-medium text-amber-200">
-              <Sparkles size={12} />
-              Fall / Winter Collection 2026
+              <Gift size={13} />
+              Nghệ Thuật Trao Quà Tinh Tế 2026
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-light tracking-tight leading-[1.15]">
-              Bộ Sưu Tập <br />
-              <span className="font-normal italic">Mùa Thu 2026</span>
+              Trao Gửi Yêu Thương <br />
+              <span className="font-normal italic text-[#E0C097]">Trọn Vẹn Ý Nghĩa</span>
             </h1>
 
             <p className="text-sm sm:text-base text-gray-200 font-light leading-relaxed max-w-md">
-              Nâng tầm phong cách của bạn với những thiết kế sang trọng, tối giản và thanh lịch nhất mùa này.
+              Mỗi món quà lẻ và set combo tại LUXE GIFTS đều được gói ghém thủ công tỉ mỉ, đi kèm thiệp chúc viết tay và hoa sáp vĩnh cửu.
             </p>
 
-            <div className="pt-2 flex items-center gap-4">
-              <Link
-                to="/products?tag=collection"
-                className="px-8 py-3.5 bg-white text-[#18181B] hover:bg-[#F3EFEA] text-xs font-semibold uppercase tracking-widest transition-all duration-300 shadow-xl inline-flex items-center gap-2 group"
+            <div className="pt-2 flex flex-wrap items-center gap-4">
+              <button
+                onClick={() => setIsAdvisorOpen(true)}
+                className="px-7 py-3.5 bg-linear-to-r from-[#D4AF37] to-[#8A5B36] hover:from-[#E5C158] hover:to-[#9E693F] text-white text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-xl inline-flex items-center gap-2 group cursor-pointer"
               >
-                Khám Phá Ngay
+                <Sparkles size={14} />
+                Gợi Ý Quà Theo Dịp
                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </button>
               <Link
-                to="/products"
-                className="px-6 py-3.5 bg-transparent border border-white/70 hover:bg-white/10 text-white text-xs font-medium uppercase tracking-widest transition-colors"
+                to="/products?giftType=combo"
+                className="px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/60 text-white text-xs font-semibold uppercase tracking-widest transition-colors backdrop-blur-xs"
               >
-                Xem Danh Mục
+                Xem Hộp Quà Combo
               </Link>
             </div>
           </div>
@@ -86,56 +113,150 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
             <div className="flex flex-col items-center justify-center p-2">
+              <Gift size={24} className="text-[#8A5B36] mb-2" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Gói Hộp Quà Miễn Phí</h4>
+              <p className="text-[11px] text-gray-500 mt-1">Hộp nhung, nơ lụa & thiệp viết tay</p>
+            </div>
+            <div className="flex flex-col items-center justify-center p-2 pt-4 md:pt-2">
               <Truck size={24} className="text-[#8A5B36] mb-2" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Giao Hàng Toàn Quốc</h4>
-              <p className="text-[11px] text-gray-500 mt-1">Miễn phí cho đơn hàng từ 1.000.000đ</p>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Giao Quà Hỏa Tốc</h4>
+              <p className="text-[11px] text-gray-500 mt-1">Giao hẹn giờ chính xác ngày sinh nhật/cưới</p>
             </div>
             <div className="flex flex-col items-center justify-center p-2 pt-4 md:pt-2">
-              <RefreshCw size={24} className="text-[#8A5B36] mb-2" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Đổi Trả Dễ Dàng</h4>
-              <p className="text-[11px] text-gray-500 mt-1">Đổi hàng miễn phí trong vòng 30 ngày</p>
-            </div>
-            <div className="flex flex-col items-center justify-center p-2 pt-4 md:pt-2">
-              <Award size={24} className="text-[#8A5B36] mb-2" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Chất Liệu Tuyển Chọn</h4>
-              <p className="text-[11px] text-gray-500 mt-1">Lụa tơ tằm, Linen hữu cơ, Cashmere</p>
+              <Sparkles size={24} className="text-[#8A5B36] mb-2" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Khắc Tên Theo Yêu Cầu</h4>
+              <p className="text-[11px] text-gray-500 mt-1">Khắc laser lên bút ký, bình nước, hộp gỗ</p>
             </div>
             <div className="flex flex-col items-center justify-center p-2 pt-4 md:pt-2">
               <ShieldCheck size={24} className="text-[#8A5B36] mb-2" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Cam Kết Chính Hãng</h4>
-              <p className="text-[11px] text-gray-500 mt-1">100% thiết kế độc quyền LUXE STORE</p>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Đổi Trả An Tâm 30 Ngày</h4>
+              <p className="text-[11px] text-gray-500 mt-1">Cam kết 100% quà chính hãng, chỉn chu</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. CATEGORIES SECTION ("Mua sắm theo chủng loại" in Figma) */}
-      <section className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 pb-4 border-b border-[#E8E2D7]">
+      {/* 3. BỘ GỢI Ý QUÀ TẶNG TRỰC TIẾP (WIZARD SECTION) */}
+      <section className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-linear-to-br from-[#1C1917] to-[#292524] text-white p-6 sm:p-10 rounded-xs shadow-2xl relative overflow-hidden">
+          <div className="relative z-10 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-white/15">
+              <div>
+                <span className="text-[10px] font-bold tracking-[0.25em] text-[#D4AF37] uppercase block mb-1">
+                  BỘ CÔNG CỤ TÌM KIẾM THÔNG MINH
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-serif font-normal text-white">
+                  Bạn Đang Tìm Quà Tặng Cho Dịp Nào?
+                </h2>
+              </div>
+              <p className="text-xs text-gray-300 max-w-sm">
+                Chọn dịp sự kiện, ngân sách và loại quà để nhận ngay các gợi ý phù hợp nhất chỉ trong vài giây.
+              </p>
+            </div>
+
+            {/* Bộ Lọc 3 Bước Nhanh */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white/10 p-4 sm:p-5 rounded-xs backdrop-blur-md border border-white/15">
+              {/* Bước 1: Dịp sự kiện */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#E0C097] flex items-center gap-1.5">
+                  <Calendar size={13} />
+                  1. Dịp sự kiện (Cưới, Sinh nhật...)
+                </label>
+                <select
+                  value={widgetOccasion}
+                  onChange={(e) => setWidgetOccasion(e.target.value)}
+                  className="w-full bg-[#18181B] text-white text-xs border border-white/20 rounded-xs p-2.5 focus:outline-hidden focus:border-[#D4AF37] cursor-pointer"
+                >
+                  {OCCASIONS.map(o => (
+                    <option key={o.id} value={o.id}>{o.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Bước 2: Chọn khoảng giá */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#E0C097] flex items-center gap-1.5">
+                  <DollarSign size={13} />
+                  2. Mức giá mong muốn
+                </label>
+                <select
+                  value={widgetPrice}
+                  onChange={(e) => setWidgetPrice(e.target.value)}
+                  className="w-full bg-[#18181B] text-white text-xs border border-white/20 rounded-xs p-2.5 focus:outline-hidden focus:border-[#D4AF37] cursor-pointer"
+                >
+                  {PRICE_RANGES.map(p => (
+                    <option key={p.id} value={p.id}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Bước 3: Quà lẻ hay quà combo */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#E0C097] flex items-center gap-1.5">
+                  <Gift size={13} />
+                  3. Hình thức quà (Lẻ hoặc Combo)
+                </label>
+                <select
+                  value={widgetGiftType}
+                  onChange={(e) => setWidgetGiftType(e.target.value)}
+                  className="w-full bg-[#18181B] text-white text-xs border border-white/20 rounded-xs p-2.5 focus:outline-hidden focus:border-[#D4AF37] cursor-pointer"
+                >
+                  {GIFT_TYPES.map(g => (
+                    <option key={g.id} value={g.id}>{g.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Hiển thị kết quả gợi ý theo bộ lọc */}
+            <div className="pt-2">
+              <div className="flex items-center justify-between text-xs text-gray-300 mb-4">
+                <span>Tìm thấy <strong className="text-white">{suggestedGifts.length}</strong> gợi ý phù hợp:</span>
+                <Link
+                  to={`/products?occasion=${widgetOccasion}&giftType=${widgetGiftType}`}
+                  className="text-xs font-bold text-[#D4AF37] hover:underline flex items-center gap-1"
+                >
+                  Xem toàn bộ kết quả lọc <ArrowRight size={13} />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {suggestedGifts.slice(0, 4).map(product => (
+                  <ProductCard key={product.id || product._id} product={product} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. DANH MỤC PHỔ BIẾN */}
+      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-[#E8E2D7]">
           <div>
             <span className="text-[11px] font-semibold tracking-widest text-[#8A5B36] uppercase block mb-1">
-              DANH MỤC PHỔ BIẾN
+              BỘ SƯU TẬP QUÀ TẶNG
             </span>
             <h2 className="text-2xl sm:text-3xl font-serif font-light text-gray-900">
-              Mua sắm theo chủng loại
+              Khám Phá Theo Chủng Loại
             </h2>
           </div>
           <Link
             to="/products"
             className="mt-3 sm:mt-0 text-xs font-semibold uppercase tracking-wider text-gray-700 hover:text-[#8A5B36] flex items-center gap-1 group"
           >
-            Xem tất cả danh mục
+            Xem tất cả danh mục quà
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
-        {/* Categories Grid (6 cards matching Figma) */}
+        {/* Categories Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {displayCategories.map((cat) => (
             <Link
               key={cat._id || cat.id || cat.slug}
               to={`/products?category=${cat.slug}`}
-              className="group relative flex flex-col items-center overflow-hidden bg-white border border-[#EBE6DC] hover:border-[#8A5B36] transition-all duration-300"
+              className="group relative flex flex-col items-center overflow-hidden bg-white border border-[#EBE6DC] hover:border-[#8A5B36] transition-all duration-300 shadow-xs hover:shadow-md"
             >
               <div className="aspect-4/5 w-full overflow-hidden bg-[#F2EFE9]">
                 <img
@@ -145,142 +266,108 @@ const Home = () => {
                 />
               </div>
               <div className="p-3 w-full text-center bg-white group-hover:bg-[#FAF8F5] transition-colors">
-                <h3 className="text-sm font-semibold text-gray-900 tracking-wide uppercase font-serif">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-900 tracking-wide font-serif">
                   {cat.name}
                 </h3>
-                <span className="text-[10px] text-gray-500">{cat.count} sản phẩm</span>
+                <span className="text-[10px] text-gray-500">{cat.count || 20} món quà</span>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* 4. NEW ARRIVALS SECTION ("Sản Phẩm Mới" in Figma) */}
+      {/* 5. QUÀ COMBO NỔI BẬT */}
       <section className="py-16 bg-white border-y border-[#ECE7DF]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 pb-4 border-b border-[#E8E2D7]">
             <div>
               <span className="text-[11px] font-semibold tracking-widest text-[#8A5B36] uppercase block mb-1">
-                HÀNG MỚI VỀ
+                TRỌN VẸN YÊU THƯƠNG
               </span>
               <h2 className="text-2xl sm:text-3xl font-serif font-light text-gray-900">
-                Sản Phẩm Mới
+                Hộp Quà & Combo Sang Trọng
               </h2>
             </div>
             <Link
-              to="/products?tag=new"
+              to="/products?giftType=combo"
               className="mt-3 sm:mt-0 text-xs font-semibold uppercase tracking-wider text-gray-700 hover:text-[#8A5B36] flex items-center gap-1 group"
             >
-              Xem toàn bộ hàng mới
+              Xem tất cả quà combo
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
-          {/* 4 Items in a Row matching Figma layout */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {newProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {comboGifts.map((product) => (
+              <ProductCard key={product.id || product._id} product={product} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* 5. EDITORIAL LOOKBOOK PROMO BANNER */}
-      <section className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative bg-[#18181B] text-white overflow-hidden shadow-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-            <div className="p-8 sm:p-14 lg:p-16 space-y-6">
-              <span className="text-[11px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] block">
-                EDITORIAL LOOKBOOK
+      {/* 6. MẶT HÀNG QUÀ LẺ TINH TUYỂN */}
+      <section className="py-16 bg-[#FAF9F6]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 pb-4 border-b border-[#E8E2D7]">
+            <div>
+              <span className="text-[11px] font-semibold tracking-widest text-[#8A5B36] uppercase block mb-1">
+                ĐỘC ĐÁO & TINH TẾ
               </span>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-light leading-tight">
-                Vẻ Đẹp Tối Giản <br />
-                <span className="italic font-normal">Vượt Thời Gian</span>
+              <h2 className="text-2xl sm:text-3xl font-serif font-light text-gray-900">
+                Mặt Hàng Quà Lẻ Tinh Tuyển
               </h2>
-              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light">
-                Mỗi thiết kế của LUXE STORE được chắt lọc từ những phom dáng kinh điển, tôn vinh khí chất thanh lịch tự nhiên của người phụ nữ hiện đại. Tinh tế từ đường kim, chỉn chu từ cấu trúc vải.
-              </p>
-              <div className="pt-2">
-                <Link
-                  to="/products?tag=collection"
-                  className="inline-block px-7 py-3.5 bg-[#8A5B36] hover:bg-[#9E693F] text-white text-xs uppercase tracking-widest font-semibold transition-colors shadow-lg"
-                >
-                  Khám Phá Lookbook
-                </Link>
-              </div>
             </div>
+            <Link
+              to="/products?giftType=single"
+              className="mt-3 sm:mt-0 text-xs font-semibold uppercase tracking-wider text-gray-700 hover:text-[#8A5B36] flex items-center gap-1 group"
+            >
+              Xem tất cả quà lẻ
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
 
-            <div className="relative h-80 sm:h-96 lg:h-full min-h-95 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop"
-                alt="Editorial Lookbook"
-                className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
-              />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {singleGifts.map((product) => (
+              <ProductCard key={product.id || product._id} product={product} />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 6. BEST SELLERS SECTION ("Bán Chạy Nhất" in Figma) */}
+      {/* 7. QUÀ BÁN CHẠY NHẤT */}
       <section className="py-16 bg-[#F6F4EE] border-t border-[#ECE7DF]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 pb-4 border-b border-[#E0D8CB]">
             <div>
               <span className="text-[11px] font-semibold tracking-widest text-[#8A5B36] uppercase block mb-1">
-                XU HƯỚNG NHẤT
+                ĐƯỢC YÊU THÍCH NHẤT
               </span>
               <h2 className="text-2xl sm:text-3xl font-serif font-light text-gray-900">
-                Bán Chạy Nhất
+                Quà Tặng Bán Chạy Nhất
               </h2>
             </div>
             <Link
               to="/products?tag=bestseller"
               className="mt-3 sm:mt-0 text-xs font-semibold uppercase tracking-wider text-gray-700 hover:text-[#8A5B36] flex items-center gap-1 group"
             >
-              Xem tất cả sản phẩm hot
+              Xem tất cả quà hot
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
-          {/* 4 Items in a Row matching Figma best sellers */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {bestSellers.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id || product._id} product={product} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* 7. INSTAGRAM & COMMUNITY GALLERY BANNER */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <span className="text-[11px] font-bold tracking-[0.25em] text-[#8A5B36] uppercase block mb-2">
-          #LUXESTYLE ON INSTAGRAM
-        </span>
-        <h2 className="text-2xl sm:text-3xl font-serif font-light text-gray-900 mb-8">
-          Chia sẻ phong cách cùng cộng đồng LUXE
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-          {[
-            "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=400&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=400&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?q=80&w=400&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=400&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400&auto=format&fit=crop"
-          ].map((imgUrl, i) => (
-            <div key={i} className="aspect-square overflow-hidden bg-gray-100 group relative">
-              <img
-                src={imgUrl}
-                alt="Luxe Community Style"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium">
-                @luxe_couture
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Modal Trợ Lý Gợi Ý Quà */}
+      <GiftAdvisorModal
+        isOpen={isAdvisorOpen}
+        onClose={() => setIsAdvisorOpen(false)}
+      />
     </div>
   );
 };

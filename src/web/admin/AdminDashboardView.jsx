@@ -33,34 +33,34 @@ const AdminDashboardView = ({ onNavigateTab }) => {
     ? [...products].sort((a, b) => (b.soldCount || 0) - (a.soldCount || 0)).slice(0, 5)
     : [
         {
-          id: '1',
-          name: 'Áo Blazer Linen Cấu Trúc',
+          id: 'gift_1',
+          name: "Hộp Quà Thư Giãn 'Serene Evening'",
           soldCount: 342,
-          images: ['https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200&q=80']
+          images: ['https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&q=80']
         },
         {
-          id: '2',
-          name: 'Quần Ống Rộng Xếp Ly Cao Cấp',
+          id: 'gift_2',
+          name: "Set Quà Tân Gia Gốm Sứ Nhật Bản 'Hòa Hợp'",
           soldCount: 289,
-          images: ['https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200&q=80']
+          images: ['https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=200&q=80']
         },
         {
-          id: '3',
-          name: 'Đầm Lụa Midi Cổ Yếm',
+          id: 'gift_3',
+          name: 'Nến Thơm Cao Cấp Tinh Dầu Gỗ Đàn Hương & Hổ Phách',
           soldCount: 212,
-          images: ['https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=200&q=80']
+          images: ['https://images.unsplash.com/photo-1603006905003-be475563bc59?w=200&q=80']
         },
         {
-          id: '4',
-          name: 'Túi Da Đeo Vai Cấu Trúc Khối',
+          id: 'gift_4',
+          name: 'Bút Ký Kim Loại Mạ Vàng & Sổ Da Handmade Khắc Tên',
           soldCount: 189,
-          images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200&q=80']
+          images: ['https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=200&q=80']
         },
         {
-          id: '5',
-          name: 'Áo Sơ Mi Lụa Cát Premium',
+          id: 'gift_5',
+          name: 'Bộ Ấm Chén Sứ Ngọc Bích Cao Cấp & Trà Sen Tây Hồ',
           soldCount: 154,
-          images: ['https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=200&q=80']
+          images: ['https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&q=80']
         }
       ];
 
