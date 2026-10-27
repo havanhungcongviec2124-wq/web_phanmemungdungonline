@@ -10,6 +10,21 @@ const getAuthHeaders = () => {
   return headers;
 };
 
+// Lấy metadata lọc sản phẩm (dịp lễ, khoảng giá, loại quà) từ backend
+export const fetchProductMetaApi = createAsyncThunk(
+  'product/fetchMeta',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${BASE_URL}/products/meta`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Lỗi lấy metadata sản phẩm');
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 // Lấy danh sách sản phẩm (có filter, search, sort, pagination)
 export const fetchProductsApi = createAsyncThunk(
   'product/fetchAll',

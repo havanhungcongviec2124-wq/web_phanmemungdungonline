@@ -11,7 +11,7 @@ import AdminReportsView from './admin/AdminReportsView';
 import { fetchProductsApi } from '../redux/product/productApi';
 import { fetchOrdersApi } from '../redux/order/orderApi';
 import { selectCurrentUser } from '../redux/Auth/authSlice';
-import { demoLoginApi } from '../redux/Auth/authApi';
+import { demoLoginApi } from '../redux/Auth/authAPI';
 import { showToast } from '../redux/ui/uiSlice';
 import { ShieldAlert, Database, Server, CheckCircle2 } from 'lucide-react';
 

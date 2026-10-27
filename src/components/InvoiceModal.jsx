@@ -1,6 +1,6 @@
 import React from 'react';
 import { Printer, Download, X, Gift, CheckCircle2, ShieldCheck, Heart } from 'lucide-react';
-import { formatCurrency } from '../data/mockData';
+import { formatCurrency } from '../utils/format';
 
 const InvoiceModal = ({ isOpen, onClose, order }) => {
   if (!isOpen || !order) return null;

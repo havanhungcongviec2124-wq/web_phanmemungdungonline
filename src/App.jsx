@@ -5,10 +5,10 @@ import Header from './components/header';
 import Foodter from './components/Foodter';
 import QuickCartDrawer from './components/QuickCartDrawer';
 import Toast from './components/Toast';
-import { fetchProductsApi } from './redux/product/productApi';
+import { fetchProductsApi, fetchProductMetaApi } from './redux/product/productApi';
 import { fetchCategoriesApi } from './redux/category/categoryApi';
 import { fetchVouchersApi } from './redux/voucher/voucherApi';
-import { fetchProfileApi } from './redux/Auth/authApi';
+import { fetchProfileApi } from './redux/Auth/authAPI';
 import { selectCurrentUser } from './redux/Auth/authSlice';
 import { loadCartForUser, clearCartFromMemory } from './redux/cart/cartSlice';
 import './index.css';
@@ -27,9 +27,10 @@ const App = () => {
   // Track previous userId to detect login/logout changes
   const prevUserIdRef = useRef(undefined);
 
-  // Load initial data on mount
+  // Load initial data on mount từ backend API
   useEffect(() => {
     dispatch(fetchProductsApi());
+    dispatch(fetchProductMetaApi());
     dispatch(fetchCategoriesApi());
     dispatch(fetchVouchersApi());
     if (localStorage.getItem('luxe_token')) {

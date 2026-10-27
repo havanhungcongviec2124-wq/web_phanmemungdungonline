@@ -1,6 +1,6 @@
 // authSlice.js — Redux slice quản lý auth state
 import { createSlice } from '@reduxjs/toolkit';
-import { loginApi, registerApi, demoLoginApi, fetchProfileApi } from './authApi';
+import { loginApi, registerApi, demoLoginApi, fetchProfileApi } from './authAPI';
 
 const initialState = {
   currentUser: (() => {

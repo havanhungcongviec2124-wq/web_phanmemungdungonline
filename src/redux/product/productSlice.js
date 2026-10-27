@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import {
   fetchProductsApi,
   fetchProductByIdApi,
+  fetchProductMetaApi,
   updateProductApi,
   createProductApi,
   deleteProductApi
@@ -11,6 +12,9 @@ import {
 const initialState = {
   items: [],          // Danh sách sản phẩm hiển thị
   selectedProduct: null, // Sản phẩm đang xem chi tiết
+  occasions: [],      // Danh sách dịp lễ từ backend
+  priceRanges: [],    // Khoảng giá từ backend
+  giftTypes: [],      // Loại quà tặng từ backend
   total: 0,
   loading: false,
   error: null,
@@ -98,6 +102,14 @@ const productSlice = createSlice({
         }
       });
 
+    // fetchProductMetaApi
+    builder
+      .addCase(fetchProductMetaApi.fulfilled, (state, action) => {
+        state.occasions = action.payload.occasions || [];
+        state.priceRanges = action.payload.priceRanges || [];
+        state.giftTypes = action.payload.giftTypes || [];
+      });
+
     // deleteProductApi
     builder
       .addCase(deleteProductApi.fulfilled, (state, action) => {
@@ -113,6 +125,9 @@ export const { setFilter, setPage, resetFilters, clearSelectedProduct } = produc
 // Selectors
 export const selectProducts = (state) => state.product.items;
 export const selectSelectedProduct = (state) => state.product.selectedProduct;
+export const selectOccasions = (state) => state.product.occasions;
+export const selectPriceRanges = (state) => state.product.priceRanges;
+export const selectGiftTypes = (state) => state.product.giftTypes;
 export const selectProductTotal = (state) => state.product.total;
 export const selectProductLoading = (state) => state.product.loading;
 export const selectProductError = (state) => state.product.error;

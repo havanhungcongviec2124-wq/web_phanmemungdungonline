@@ -17,22 +17,29 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectProducts } from '../../redux/product/productSlice';
+import { selectProducts, selectOccasions } from '../../redux/product/productSlice';
+import { selectCategories } from '../../redux/category/categorySlice';
 import {
   updateProductApi,
   createProductApi,
   deleteProductApi,
-  fetchProductsApi
+  fetchProductsApi,
+  fetchProductMetaApi
 } from '../../redux/product/productApi';
+import { fetchCategoriesApi } from '../../redux/category/categoryApi';
 import { showToast } from '../../redux/ui/uiSlice';
-import { CATEGORIES, OCCASIONS, GIFT_TYPES } from '../../data/mockData';
-
-const formatCurrency = (val) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
+import { formatCurrency } from '../../utils/format';
 
 const AdminProductsView = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
+  const categories = useSelector(selectCategories);
+  const occasions = useSelector(selectOccasions);
+
+  React.useEffect(() => {
+    if (categories.length === 0) dispatch(fetchCategoriesApi());
+    if (occasions.length === 0) dispatch(fetchProductMetaApi());
+  }, [dispatch, categories.length, occasions.length]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -258,7 +265,7 @@ const AdminProductsView = () => {
                 }}
                 className="text-xs border border-gray-300 rounded-xs py-2 px-3 bg-[#FAF8F5] focus:outline-hidden focus:border-black cursor-pointer font-medium"
               >
-                {OCCASIONS.map(occ => (
+                {occasions.map(occ => (
                   <option key={occ.id} value={occ.id}>{occ.name}</option>
                 ))}
               </select>
@@ -276,7 +283,7 @@ const AdminProductsView = () => {
                 className="text-xs border border-gray-300 rounded-xs py-2 px-3 bg-[#FAF8F5] focus:outline-hidden focus:border-black cursor-pointer font-medium"
               >
                 <option value="all">Tất cả danh mục</option>
-                {CATEGORIES.map(c => (
+                {categories.map(c => (
                   <option key={c.slug} value={c.slug}>{c.name}</option>
                 ))}
               </select>
@@ -505,7 +512,7 @@ const AdminProductsView = () => {
                   <select
                     value={formData.category}
                     onChange={(e) => {
-                      const cat = CATEGORIES.find(c => c.slug === e.target.value);
+                      const cat = categories.find(c => c.slug === e.target.value);
                       setFormData({
                         ...formData,
                         category: e.target.value,
@@ -514,7 +521,7 @@ const AdminProductsView = () => {
                     }}
                     className="w-full p-2 border border-gray-300 rounded-xs bg-white cursor-pointer"
                   >
-                    {CATEGORIES.map(c => (
+                    {categories.map(c => (
                       <option key={c.slug} value={c.slug}>{c.name}</option>
                     ))}
                   </select>
@@ -525,7 +532,7 @@ const AdminProductsView = () => {
               <div>
                 <label className="font-bold text-gray-700 block mb-1.5">Dịp sự kiện phù hợp (Chọn nhiều):</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {OCCASIONS.filter(o => o.id !== 'all').map(occ => (
+                  {occasions.filter(o => o.id !== 'all').map(occ => (
                     <label key={occ.id} className="flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"

@@ -16,16 +16,23 @@ import {
 import ProductCard from '../components/ProductCard';
 import GiftAdvisorModal from '../components/GiftAdvisorModal';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectProducts } from '../redux/product/productSlice';
-import { fetchProductsApi } from '../redux/product/productApi';
+import {
+  selectProducts,
+  selectOccasions,
+  selectPriceRanges,
+  selectGiftTypes,
+} from '../redux/product/productSlice';
+import { fetchProductsApi, fetchProductMetaApi } from '../redux/product/productApi';
 import { selectCategories } from '../redux/category/categorySlice';
 import { fetchCategoriesApi } from '../redux/category/categoryApi';
-import { CATEGORIES, PRODUCTS, OCCASIONS, PRICE_RANGES, GIFT_TYPES } from '../data/mockData';
 
 const Home = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
+  const occasions = useSelector(selectOccasions);
+  const priceRanges = useSelector(selectPriceRanges);
+  const giftTypes = useSelector(selectGiftTypes);
 
   // Modal Trợ lý chọn quà
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
@@ -38,24 +45,22 @@ const Home = () => {
   React.useEffect(() => {
     if (products.length === 0) dispatch(fetchProductsApi());
     if (categories.length === 0) dispatch(fetchCategoriesApi());
-  }, [dispatch, products.length, categories.length]);
-
-  const displayProducts = products.length > 0 ? products : PRODUCTS;
-  const displayCategories = categories.length > 0 ? categories : CATEGORIES;
+    if (occasions.length === 0) dispatch(fetchProductMetaApi());
+  }, [dispatch, products.length, categories.length, occasions.length]);
 
   // Lọc theo widget tương tác
-  const priceFilter = PRICE_RANGES.find(p => p.id === widgetPrice) || PRICE_RANGES[0];
-  const suggestedGifts = displayProducts.filter(p => {
+  const priceFilter = priceRanges.find(p => p.id === widgetPrice) || { min: 0, max: 10000000 };
+  const suggestedGifts = products.filter(p => {
     if (widgetOccasion !== 'all' && !p.occasions?.includes(widgetOccasion)) return false;
     if (p.price < priceFilter.min || p.price > priceFilter.max) return false;
     if (widgetGiftType !== 'all' && p.giftType !== widgetGiftType) return false;
     return true;
   });
 
-  // Nhóm quà Combo & Quà Lẻ
-  const comboGifts = displayProducts.filter(p => p.giftType === 'combo').slice(0, 4);
-  const singleGifts = displayProducts.filter(p => p.giftType === 'single').slice(0, 4);
-  const bestSellers = displayProducts.filter(p => p.isBestSeller).slice(0, 4);
+  // Nhóm quà Combo & Quà Lẻ trực tiếp từ dữ liệu backend
+  const comboGifts = products.filter(p => p.giftType === 'combo').slice(0, 4);
+  const singleGifts = products.filter(p => p.giftType === 'single').slice(0, 4);
+  const bestSellers = products.filter(p => p.isBestSeller).slice(0, 4);
 
   return (
     <div className="bg-[#FAF9F6] text-[#1E1E1E]">
@@ -167,7 +172,7 @@ const Home = () => {
                   onChange={(e) => setWidgetOccasion(e.target.value)}
                   className="w-full bg-[#18181B] text-white text-xs border border-white/20 rounded-xs p-2.5 focus:outline-hidden focus:border-[#D4AF37] cursor-pointer"
                 >
-                  {OCCASIONS.map(o => (
+                  {occasions.map(o => (
                     <option key={o.id} value={o.id}>{o.name}</option>
                   ))}
                 </select>
@@ -184,7 +189,7 @@ const Home = () => {
                   onChange={(e) => setWidgetPrice(e.target.value)}
                   className="w-full bg-[#18181B] text-white text-xs border border-white/20 rounded-xs p-2.5 focus:outline-hidden focus:border-[#D4AF37] cursor-pointer"
                 >
-                  {PRICE_RANGES.map(p => (
+                  {priceRanges.map(p => (
                     <option key={p.id} value={p.id}>{p.label}</option>
                   ))}
                 </select>
@@ -201,7 +206,7 @@ const Home = () => {
                   onChange={(e) => setWidgetGiftType(e.target.value)}
                   className="w-full bg-[#18181B] text-white text-xs border border-white/20 rounded-xs p-2.5 focus:outline-hidden focus:border-[#D4AF37] cursor-pointer"
                 >
-                  {GIFT_TYPES.map(g => (
+                  {giftTypes.map(g => (
                     <option key={g.id} value={g.id}>{g.label}</option>
                   ))}
                 </select>
@@ -252,7 +257,7 @@ const Home = () => {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {displayCategories.map((cat) => (
+          {categories.map((cat) => (
             <Link
               key={cat._id || cat.id || cat.slug}
               to={`/products?category=${cat.slug}`}

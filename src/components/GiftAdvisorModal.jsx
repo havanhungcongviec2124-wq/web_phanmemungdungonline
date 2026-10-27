@@ -2,14 +2,22 @@ import React, { useState } from 'react';
 import { Sparkles, X, Gift, Check, ArrowRight, Heart, ShoppingBag, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { OCCASIONS, PRICE_RANGES, GIFT_TYPES, formatCurrency } from '../data/mockData';
-import { selectProducts } from '../redux/product/productSlice';
+import {
+  selectProducts,
+  selectOccasions,
+  selectPriceRanges,
+  selectGiftTypes,
+} from '../redux/product/productSlice';
 import { addToCart, setDrawerOpen } from '../redux/cart/cartSlice';
 import { showToast } from '../redux/ui/uiSlice';
+import { formatCurrency } from '../utils/format';
 
 const GiftAdvisorModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
+  const occasions = useSelector(selectOccasions);
+  const priceRanges = useSelector(selectPriceRanges);
+  const giftTypes = useSelector(selectGiftTypes);
 
   const [selectedOccasion, setSelectedOccasion] = useState('cuoi');
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
@@ -18,7 +26,7 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   // Filter matching gifts based on criteria
-  const priceConfig = PRICE_RANGES.find(p => p.id === selectedPriceRange) || PRICE_RANGES[0];
+  const priceConfig = priceRanges.find(p => p.id === selectedPriceRange) || { min: 0, max: 10000000 };
 
   const matchedGifts = products.filter(product => {
     // 1. Occasion match
@@ -102,7 +110,7 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
               Chọn Dịp / Sự Kiện Tặng Quà:
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-              {OCCASIONS.map((occ) => (
+              {occasions.map((occ) => (
                 <button
                   key={occ.id}
                   onClick={() => setSelectedOccasion(occ.id)}
@@ -128,7 +136,7 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
                 Mức Ngân Sách Dự Kiến:
               </label>
               <div className="flex flex-wrap gap-2">
-                {PRICE_RANGES.map((pr) => (
+                {priceRanges.map((pr) => (
                   <button
                     key={pr.id}
                     onClick={() => setSelectedPriceRange(pr.id)}
@@ -151,7 +159,7 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
                 Hình Thức Quà Tặng:
               </label>
               <div className="flex gap-2">
-                {GIFT_TYPES.map((gt) => (
+                {giftTypes.map((gt) => (
                   <button
                     key={gt.id}
                     onClick={() => setSelectedGiftType(gt.id)}

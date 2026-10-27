@@ -15,31 +15,30 @@ import {
 import ProductCard from '../components/ProductCard';
 import GiftAdvisorModal from '../components/GiftAdvisorModal';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectProducts } from '../redux/product/productSlice';
-import { fetchProductsApi } from '../redux/product/productApi';
+import {
+  selectProducts,
+  selectOccasions,
+  selectPriceRanges,
+  selectGiftTypes,
+} from '../redux/product/productSlice';
+import { fetchProductsApi, fetchProductMetaApi } from '../redux/product/productApi';
 import { selectCategories } from '../redux/category/categorySlice';
 import { fetchCategoriesApi } from '../redux/category/categoryApi';
-import {
-  PRODUCTS,
-  CATEGORIES,
-  OCCASIONS,
-  PRICE_RANGES,
-  GIFT_TYPES,
-  formatCurrency
-} from '../data/mockData';
+import { formatCurrency } from '../utils/format';
 
 const Products = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
+  const occasions = useSelector(selectOccasions);
+  const priceRanges = useSelector(selectPriceRanges);
+  const giftTypes = useSelector(selectGiftTypes);
 
   React.useEffect(() => {
     if (products.length === 0) dispatch(fetchProductsApi());
     if (categories.length === 0) dispatch(fetchCategoriesApi());
-  }, [dispatch, products.length, categories.length]);
-
-  const sourceProducts = products.length > 0 ? products : PRODUCTS;
-  const sourceCategories = categories.length > 0 ? categories : CATEGORIES;
+    if (occasions.length === 0) dispatch(fetchProductMetaApi());
+  }, [dispatch, products.length, categories.length, occasions.length]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
@@ -67,9 +66,9 @@ const Products = () => {
 
   // Filtering products
   const filteredProducts = useMemo(() => {
-    const activePriceRange = PRICE_RANGES.find(p => p.id === selectedPriceRange) || PRICE_RANGES[0];
+    const activePriceRange = priceRanges.find(p => p.id === selectedPriceRange) || { min: 0, max: 10000000 };
 
-    return sourceProducts.filter(product => {
+    return products.filter(product => {
       // 1. Search query
       if (queryParam) {
         const q = queryParam.toLowerCase();
@@ -108,7 +107,8 @@ const Products = () => {
       return 0; // default newest
     });
   }, [
-    sourceProducts,
+    products,
+    priceRanges,
     queryParam,
     tagParam,
     selectedCategory,
@@ -150,7 +150,7 @@ const Products = () => {
             <>
               <ChevronRight size={12} />
               <span className="text-gray-900 capitalize">
-                {sourceCategories.find(c => c.slug === selectedCategory)?.name || selectedCategory}
+                {categories.find(c => c.slug === selectedCategory)?.name || selectedCategory}
               </span>
             </>
           )}
@@ -175,9 +175,9 @@ const Products = () => {
                 : selectedGiftType === 'single'
                 ? 'Mặt Hàng Quà Tặng Lẻ Tinh Tuyển'
                 : selectedOccasion !== 'all'
-                ? `Quà Tặng Dịp ${OCCASIONS.find(o => o.id === selectedOccasion)?.name || ''}`
+                ? `Quà Tặng Dịp ${occasions.find(o => o.id === selectedOccasion)?.name || ''}`
                 : selectedCategory !== 'all'
-                ? sourceCategories.find(c => c.slug === selectedCategory)?.name || 'Danh Sách Quà Tặng'
+                ? categories.find(c => c.slug === selectedCategory)?.name || 'Danh Sách Quà Tặng'
                 : 'Tất Cả Món Quà & Combo'}
             </h1>
             <p className="text-xs text-gray-500 mt-1">
@@ -224,7 +224,7 @@ const Products = () => {
 
         {/* Quick Gift Type Tabs (Tất cả, Quà Lẻ, Quà Combo) */}
         <div className="flex items-center gap-2 pb-6 overflow-x-auto">
-          {GIFT_TYPES.map((gt) => (
+          {giftTypes.map((gt) => (
             <button
               key={gt.id}
               onClick={() => setSelectedGiftType(gt.id)}
@@ -248,7 +248,7 @@ const Products = () => {
 
             {selectedOccasion !== 'all' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#FAF5EE] text-xs text-[#8A5B36] font-semibold rounded-xs border border-[#E8DFD0]">
-                Dịp: {OCCASIONS.find(o => o.id === selectedOccasion)?.name}
+                Dịp: {occasions.find(o => o.id === selectedOccasion)?.name}
                 <button onClick={() => setSelectedOccasion('all')} className="hover:text-red-600"><X size={12} /></button>
               </span>
             )}
@@ -262,14 +262,14 @@ const Products = () => {
 
             {selectedPriceRange !== 'all' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#F5F2EB] text-xs text-gray-800 rounded-xs">
-                Khoảng giá: {PRICE_RANGES.find(p => p.id === selectedPriceRange)?.label}
+                Khoảng giá: {priceRanges.find(p => p.id === selectedPriceRange)?.label}
                 <button onClick={() => setSelectedPriceRange('all')} className="hover:text-red-600"><X size={12} /></button>
               </span>
             )}
 
             {selectedCategory !== 'all' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#F5F2EB] text-xs text-gray-800 rounded-xs">
-                Danh mục: {sourceCategories.find(c => c.slug === selectedCategory)?.name}
+                Danh mục: {categories.find(c => c.slug === selectedCategory)?.name}
                 <button onClick={() => setSelectedCategory('all')} className="hover:text-red-600"><X size={12} /></button>
               </span>
             )}
@@ -312,7 +312,7 @@ const Products = () => {
                 DỊP / SỰ KIỆN TẶNG QUÀ
               </h4>
               <div className="space-y-1.5">
-                {OCCASIONS.map((occ) => (
+                {occasions.map((occ) => (
                   <button
                     key={occ.id}
                     onClick={() => setSelectedOccasion(occ.id)}
@@ -336,7 +336,7 @@ const Products = () => {
                 NGÂN SÁCH DỰ KIẾN
               </h4>
               <div className="space-y-1.5">
-                {PRICE_RANGES.map((pr) => (
+                {priceRanges.map((pr) => (
                   <button
                     key={pr.id}
                     onClick={() => setSelectedPriceRange(pr.id)}
@@ -386,11 +386,11 @@ const Products = () => {
                   }`}
                 >
                   <span>Tất cả danh mục</span>
-                  <span className="text-[10px] text-gray-400">{sourceProducts.length}</span>
+                  <span className="text-[10px] text-gray-400">{products.length}</span>
                 </button>
-                {sourceCategories.map((cat) => (
+                {categories.map((cat) => (
                   <button
-                    key={cat.id || cat.slug}
+                    key={cat._id || cat.id || cat.slug}
                     onClick={() => setSelectedCategory(cat.slug)}
                     className={`w-full text-left py-1.5 px-2 rounded-xs text-xs transition-colors flex items-center justify-between cursor-pointer ${
                       selectedCategory === cat.slug
@@ -450,7 +450,7 @@ const Products = () => {
             <div>
               <h4 className="text-xs font-bold uppercase text-gray-800 mb-2">Dịp tặng quà</h4>
               <div className="space-y-1">
-                {OCCASIONS.map(occ => (
+                {occasions.map(occ => (
                   <button
                     key={occ.id}
                     onClick={() => setSelectedOccasion(occ.id)}
@@ -466,7 +466,7 @@ const Products = () => {
             <div className="pt-4 border-t border-gray-100">
               <h4 className="text-xs font-bold uppercase text-gray-800 mb-2">Hình thức quà</h4>
               <div className="flex gap-2">
-                {GIFT_TYPES.map(gt => (
+                {giftTypes.map(gt => (
                   <button
                     key={gt.id}
                     onClick={() => setSelectedGiftType(gt.id)}
@@ -482,7 +482,7 @@ const Products = () => {
             <div className="pt-4 border-t border-gray-100">
               <h4 className="text-xs font-bold uppercase text-gray-800 mb-2">Mức giá</h4>
               <div className="space-y-1">
-                {PRICE_RANGES.map(pr => (
+                {priceRanges.map(pr => (
                   <button
                     key={pr.id}
                     onClick={() => setSelectedPriceRange(pr.id)}

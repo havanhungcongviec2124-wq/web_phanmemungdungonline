@@ -17,7 +17,7 @@ import { selectTotalItemsCount, selectWishlist, setDrawerOpen } from '../redux/c
 import { selectCategories } from '../redux/category/categorySlice';
 import { selectProducts } from '../redux/product/productSlice';
 import { selectCurrentUser } from '../redux/Auth/authSlice';
-import { formatCurrency } from '../data/mockData';
+import { formatCurrency } from '../utils/format';
 import GiftAdvisorModal from './GiftAdvisorModal';
 
 const Header = () => {

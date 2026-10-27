@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, User, Phone, Eye, EyeOff } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginApi, registerApi } from '../redux/Auth/authApi';
+import { loginApi, registerApi } from '../redux/Auth/authAPI';
 import { selectAuthLoading, selectAuthError, clearAuthError } from '../redux/Auth/authSlice';
 import { showToast } from '../redux/ui/uiSlice';
 

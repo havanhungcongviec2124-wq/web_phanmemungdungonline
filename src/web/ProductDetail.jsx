@@ -13,7 +13,8 @@ import {
   Ruler,
   X,
   Share2,
-  Check
+  Check,
+  Gift
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -30,7 +31,7 @@ import {
 } from '../redux/cart/cartSlice';
 import { selectCurrentUser } from '../redux/Auth/authSlice';
 import { showToast } from '../redux/ui/uiSlice';
-import { formatCurrency } from '../data/mockData';
+import { formatCurrency } from '../utils/format';
 import ProductCard from '../components/ProductCard';
 
 const ProductDetail = () => {

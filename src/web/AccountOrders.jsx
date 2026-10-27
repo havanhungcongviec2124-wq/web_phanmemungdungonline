@@ -9,7 +9,7 @@ import { selectProducts } from '../redux/product/productSlice';
 import { fetchProductsApi } from '../redux/product/productApi';
 import { selectCurrentUser, logout } from '../redux/Auth/authSlice';
 import { showToast } from '../redux/ui/uiSlice';
-import { formatCurrency } from '../data/mockData';
+import { formatCurrency } from '../utils/format';
 import ProductCard from '../components/ProductCard';
 import InvoiceModal from '../components/InvoiceModal';
 
