@@ -21,18 +21,47 @@ import {
   selectOccasions,
   selectPriceRanges,
   selectGiftTypes,
+  selectProductLoading,
 } from '../redux/product/productSlice';
 import { fetchProductsApi, fetchProductMetaApi } from '../redux/product/productApi';
 import { selectCategories } from '../redux/category/categorySlice';
 import { fetchCategoriesApi } from '../redux/category/categoryApi';
 
+// Fallback tĩnh phòng khi API chưa sẵn sàng
+const FALLBACK_OCCASIONS = [
+  { id: 'all', name: 'Tất cả dịp lễ' },
+  { id: 'cuoi', name: 'Cưới hỏi & Hỷ sự' },
+  { id: 'sinh-nhat', name: 'Sinh nhật' },
+  { id: 'tan-gia', name: 'Mừng tân gia' },
+  { id: 'ky-niem', name: 'Kỷ niệm & Tình yêu' },
+  { id: 'doanh-nghiep', name: 'Tri ân đối tác / Sếp' },
+];
+const FALLBACK_PRICE_RANGES = [
+  { id: 'all', label: 'Tất cả mức giá', min: 0, max: 10000000 },
+  { id: 'under-300', label: 'Dưới 300.000đ', min: 0, max: 300000 },
+  { id: '300-500', label: '300.000đ - 500.000đ', min: 300000, max: 500000 },
+  { id: '500-1000', label: '500.000đ - 1.000.000đ', min: 500000, max: 1000000 },
+  { id: 'above-1000', label: 'Trên 1.000.000đ', min: 1000000, max: 10000000 },
+];
+const FALLBACK_GIFT_TYPES = [
+  { id: 'all', label: 'Tất cả quà tặng' },
+  { id: 'single', label: 'Quà lẻ' },
+  { id: 'combo', label: 'Quà combo' },
+];
+
 const Home = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
-  const occasions = useSelector(selectOccasions);
-  const priceRanges = useSelector(selectPriceRanges);
-  const giftTypes = useSelector(selectGiftTypes);
+  const isLoading = useSelector(selectProductLoading);
+  const rawOccasions = useSelector(selectOccasions);
+  const rawPriceRanges = useSelector(selectPriceRanges);
+  const rawGiftTypes = useSelector(selectGiftTypes);
+
+  // Dùng fallback nếu API chưa trả dữ liệu
+  const occasions = rawOccasions.length > 0 ? rawOccasions : FALLBACK_OCCASIONS;
+  const priceRanges = rawPriceRanges.length > 0 ? rawPriceRanges : FALLBACK_PRICE_RANGES;
+  const giftTypes = rawGiftTypes.length > 0 ? rawGiftTypes : FALLBACK_GIFT_TYPES;
 
   // Modal Trợ lý chọn quà
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
@@ -45,11 +74,11 @@ const Home = () => {
   React.useEffect(() => {
     if (products.length === 0) dispatch(fetchProductsApi());
     if (categories.length === 0) dispatch(fetchCategoriesApi());
-    if (occasions.length === 0) dispatch(fetchProductMetaApi());
-  }, [dispatch, products.length, categories.length, occasions.length]);
+    if (rawOccasions.length === 0) dispatch(fetchProductMetaApi());
+  }, [dispatch, products.length, categories.length, rawOccasions.length]);
 
   // Lọc theo widget tương tác
-  const priceFilter = priceRanges.find(p => p.id === widgetPrice) || { min: 0, max: 10000000 };
+  const priceFilter = priceRanges.find(p => p.id === widgetPrice) ?? { min: 0, max: 10000000 };
   const suggestedGifts = products.filter(p => {
     if (widgetOccasion !== 'all' && !p.occasions?.includes(widgetOccasion)) return false;
     if (p.price < priceFilter.min || p.price > priceFilter.max) return false;
@@ -216,7 +245,12 @@ const Home = () => {
             {/* Hiển thị kết quả gợi ý theo bộ lọc */}
             <div className="pt-2">
               <div className="flex items-center justify-between text-xs text-gray-300 mb-4">
-                <span>Tìm thấy <strong className="text-white">{suggestedGifts.length}</strong> gợi ý phù hợp:</span>
+                <span>
+                  {isLoading
+                    ? 'Đang tải gợi ý...'
+                    : <>Tìm thấy <strong className="text-white">{suggestedGifts.length}</strong> gợi ý phù hợp:</>
+                  }
+                </span>
                 <Link
                   to={`/products?occasion=${widgetOccasion}&giftType=${widgetGiftType}`}
                   className="text-xs font-bold text-[#D4AF37] hover:underline flex items-center gap-1"
@@ -225,11 +259,39 @@ const Home = () => {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {suggestedGifts.slice(0, 4).map(product => (
-                  <ProductCard key={product.id || product._id} product={product} />
-                ))}
-              </div>
+              {/* Skeleton loading */}
+              {isLoading && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-white/10 rounded-xs animate-pulse">
+                      <div className="aspect-square bg-white/15 rounded-t-xs" />
+                      <div className="p-3 space-y-2">
+                        <div className="h-3 bg-white/15 rounded w-3/4" />
+                        <div className="h-3 bg-white/15 rounded w-1/2" />
+                        <div className="h-4 bg-white/20 rounded w-1/3" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Kết quả */}
+              {!isLoading && suggestedGifts.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {suggestedGifts.slice(0, 4).map(product => (
+                    <ProductCard key={product.id || product._id} product={product} />
+                  ))}
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!isLoading && suggestedGifts.length === 0 && (
+                <div className="text-center py-10 text-gray-400">
+                  <Gift size={40} className="mx-auto mb-3 opacity-40" />
+                  <p className="text-sm">Không tìm thấy quà phù hợp với bộ lọc này.</p>
+                  <p className="text-xs mt-1 opacity-60">Thử chọn dịp khác hoặc mức giá rộng hơn.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
