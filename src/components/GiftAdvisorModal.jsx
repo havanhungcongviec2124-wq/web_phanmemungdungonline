@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Sparkles, X, Gift, Check, ArrowRight, Heart, ShoppingBag, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Sparkles, X, Gift, ArrowRight, ShoppingBag, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -12,12 +13,39 @@ import { addToCart, setDrawerOpen } from '../redux/cart/cartSlice';
 import { showToast } from '../redux/ui/uiSlice';
 import { formatCurrency } from '../utils/format';
 
+// Fallback tĩnh phòng khi API chưa sẵn sàng
+const FALLBACK_OCCASIONS = [
+  { id: 'all', name: 'Tất cả dịp lễ', desc: '' },
+  { id: 'cuoi', name: 'Cưới hỏi & Hỷ sự', desc: 'Chúc phúc trăm năm hạnh phúc' },
+  { id: 'sinh-nhat', name: 'Sinh nhật', desc: 'Bất ngờ ngọt ngào mừng tuổi mới' },
+  { id: 'tan-gia', name: 'Mừng tân gia', desc: 'Tài lộc, bình an cho tổ ấm mới' },
+  { id: 'ky-niem', name: 'Kỷ niệm & Tình yêu', desc: 'Lãng mạn, thăng hoa cảm xúc' },
+  { id: 'doanh-nghiep', name: 'Tri ân đối tác / Sếp', desc: 'Sang trọng, chuyên nghiệp' },
+];
+const FALLBACK_PRICE_RANGES = [
+  { id: 'all', label: 'Tất cả mức giá', min: 0, max: 10000000 },
+  { id: 'under-300', label: 'Dưới 300.000đ', min: 0, max: 300000 },
+  { id: '300-500', label: '300.000đ – 500.000đ', min: 300000, max: 500000 },
+  { id: '500-1000', label: '500.000đ – 1.000.000đ', min: 500000, max: 1000000 },
+  { id: 'above-1000', label: 'Trên 1.000.000đ', min: 1000000, max: 10000000 },
+];
+const FALLBACK_GIFT_TYPES = [
+  { id: 'all', label: 'Tất cả quà tặng' },
+  { id: 'single', label: 'Quà lẻ' },
+  { id: 'combo', label: 'Quà combo' },
+];
+
 const GiftAdvisorModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
-  const occasions = useSelector(selectOccasions);
-  const priceRanges = useSelector(selectPriceRanges);
-  const giftTypes = useSelector(selectGiftTypes);
+  const rawOccasions = useSelector(selectOccasions);
+  const rawPriceRanges = useSelector(selectPriceRanges);
+  const rawGiftTypes = useSelector(selectGiftTypes);
+
+  // Dùng fallback nếu API chưa trả dữ liệu
+  const occasions = rawOccasions.length > 0 ? rawOccasions : FALLBACK_OCCASIONS;
+  const priceRanges = rawPriceRanges.length > 0 ? rawPriceRanges : FALLBACK_PRICE_RANGES;
+  const giftTypes = rawGiftTypes.length > 0 ? rawGiftTypes : FALLBACK_GIFT_TYPES;
 
   const [selectedOccasion, setSelectedOccasion] = useState('cuoi');
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
@@ -34,49 +62,43 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
       const matchOcc = product.occasions?.includes(selectedOccasion);
       if (!matchOcc) return false;
     }
-
     // 2. Price match
     if (product.price < priceConfig.min || product.price > priceConfig.max) {
       return false;
     }
-
     // 3. Gift type match (single / combo)
     if (selectedGiftType !== 'all' && product.giftType !== selectedGiftType) {
       return false;
     }
-
     return true;
   });
-
   const handleQuickAdd = (product) => {
     dispatch(
       addToCart({
         product,
         quantity: 1,
         color: 'Tiêu chuẩn',
-        size: 'Hộp quà cao cấp'
+        size: 'Hộp quà cao cấp',
       })
     );
     dispatch(showToast({ message: `Đã thêm "${product.name}" vào giỏ quà!`, type: 'success' }));
     dispatch(setDrawerOpen(true));
   };
-
   const resetCriteria = () => {
     setSelectedOccasion('all');
     setSelectedPriceRange('all');
     setSelectedGiftType('all');
   };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+  const modalContent = (
+    // Wrapper: relative + full màn hình bằng 100vw/100vh
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center py-6 px-4 overflow-y-auto animate-fade-in">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/65 backdrop-blur-sm"
         onClick={onClose}
       />
-
       {/* Modal Container */}
-      <div className="relative bg-[#FAF9F6] border border-[#E8E1D5] max-w-4xl w-full rounded-xs shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative bg-[#FAF9F6] border border-[#E8E1D5] max-w-4xl w-full rounded-xs shadow-2xl z-10 overflow-hidden flex flex-col my-auto max-h-[calc(100vh-3rem)]">
         {/* Header */}
         <div className="bg-[#18181B] text-white p-5 sm:p-6 flex items-center justify-between border-b border-amber-900/40">
           <div className="flex items-center gap-3">
@@ -127,9 +149,8 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Step 2 & 3: Chọn mức giá & Phân loại quà */}
+          {/* Step 2 & 3 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
-            {/* Step 2: Chọn khoảng giá */}
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2 mb-2.5">
                 <span className="w-5 h-5 rounded-full bg-[#8A5B36] text-white text-[10px] flex items-center justify-center font-bold">2</span>
@@ -152,7 +173,6 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Step 3: Chọn loại quà lẻ / quà combo */}
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2 mb-2.5">
                 <span className="w-5 h-5 rounded-full bg-[#8A5B36] text-white text-[10px] flex items-center justify-center font-bold">3</span>
@@ -208,7 +228,7 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {matchedGifts.slice(0, 6).map((gift) => (
                 <div
-                  key={gift.id}
+                  key={gift._id || gift.id}
                   className="bg-white border border-[#ECE7DF] hover:border-[#8A5B36] p-3 rounded-xs flex flex-col justify-between group transition-all duration-300 hover:shadow-lg"
                 >
                   <div className="space-y-2.5">
@@ -224,13 +244,12 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
                         {gift.giftType === 'combo' ? 'Combo Set' : 'Quà Lẻ'}
                       </span>
                     </div>
-
                     <div>
                       <span className="text-[10px] text-[#8A5B36] font-semibold uppercase tracking-wider block">
                         {gift.categoryName}
                       </span>
                       <h4 className="text-xs sm:text-sm font-serif font-semibold text-gray-900 line-clamp-1 group-hover:text-[#8A5B36] transition-colors">
-                        <Link to={`/product/${gift.id}`} onClick={onClose}>
+                        <Link to={`/product/${gift._id || gift.id}`} onClick={onClose}>
                           {gift.name}
                         </Link>
                       </h4>
@@ -252,7 +271,6 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
                       )}
                     </div>
 
-                    {/* Song song đã bán & còn tồn */}
                     <div className="flex items-center justify-between text-[10px] text-gray-500 bg-[#FAF8F5] p-1.5 rounded-xs">
                       <span>Đã bán: <strong className="text-gray-800">{gift.soldCount ?? 0}</strong></span>
                       <span>Còn tồn: <strong className="text-emerald-700">{gift.stock ?? 0}</strong></span>
@@ -267,7 +285,7 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
                         Chọn Món Này
                       </button>
                       <Link
-                        to={`/product/${gift.id}`}
+                        to={`/product/${gift._id || gift.id}`}
                         onClick={onClose}
                         className="px-2.5 py-1.5 border border-gray-300 hover:border-black text-gray-700 text-[11px] rounded-xs flex items-center justify-center"
                         title="Xem chi tiết"
@@ -298,6 +316,9 @@ const GiftAdvisorModal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
+
+  // Portal ra document.body để không bị ảnh hưởng bởi header (sticky/backdrop-blur)
+  return createPortal(modalContent, document.body);
 };
 
 export default GiftAdvisorModal;
