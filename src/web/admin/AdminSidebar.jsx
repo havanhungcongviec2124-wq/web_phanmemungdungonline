@@ -9,13 +9,14 @@ import {
   Settings,
   ArrowLeft,
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentUser, logout } from '../../redux/Auth/authSlice';
 import { showToast } from '../../redux/ui/uiSlice';
 
-const AdminSidebar = ({ activeTab, setActiveTab }) => {
+const AdminSidebar = ({ activeTab, setActiveTab, isMobileOpen = false, onMobileClose }) => {
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
 
@@ -28,87 +29,119 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
     { id: 'settings', label: 'Cài đặt', icon: Settings },
   ];
 
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    // Trên mobile: đóng drawer sau khi chọn mục
+    onMobileClose?.();
+  };
+
   const handleLogout = () => {
     dispatch(logout());
     dispatch(showToast({ message: 'Đã đăng xuất tài khoản quản trị', type: 'info' }));
+    onMobileClose?.();
   };
 
   return (
-    <aside className="w-64 bg-[#111111] text-[#A1A1AA] flex flex-col shrink-0 min-h-screen border-r border-[#222222] select-none">
-      {/* Brand Header */}
-      <div className="p-6 border-b border-[#222222]">
-        <Link to="/admin" className="block">
-          <span className="text-xl font-bold tracking-[0.2em] text-white font-serif uppercase block">
-            LUXE<span className="font-light text-[#D4AF37] ml-1">STORE</span>
-          </span>
-          <span className="text-[10px] tracking-[0.25em] text-[#8C827A] font-sans uppercase font-medium block mt-1">
-            ADMIN PORTAL
-          </span>
-        </Link>
-      </div>
+    <>
+      {/* Backdrop mờ phía sau drawer — chỉ hiện trên mobile khi mở menu */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-xs uppercase tracking-wider font-medium rounded-xs transition-all duration-200 text-left cursor-pointer ${
-                isActive
-                  ? 'bg-[#222224] text-white font-semibold shadow-xs border-l-3 border-[#8A5B36]'
-                  : 'text-[#909099] hover:bg-[#1A1A1C] hover:text-[#ECECEC]'
-              }`}
-            >
-              <Icon
-                size={16}
-                className={isActive ? 'text-[#C9A87C]' : 'text-[#71717A]'}
-              />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-
-        <div className="pt-6 mt-6 border-t border-[#222222]">
-          <Link
-            to="/"
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#71717A] hover:text-white hover:bg-[#1A1A1C] rounded-xs transition-colors"
-          >
-            <ArrowLeft size={15} />
-            <span>Về website bán hàng</span>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-[#111111] text-[#A1A1AA] flex flex-col shrink-0 border-r border-[#222222] select-none transition-transform duration-300 ease-in-out lg:static lg:w-64 lg:max-w-none lg:min-h-screen lg:translate-x-0 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Brand Header */}
+        <div className="p-6 border-b border-[#222222] flex items-center justify-between gap-3">
+          <Link to="/admin" onClick={onMobileClose} className="block min-w-0">
+            <span className="text-xl font-bold tracking-[0.2em] text-white font-serif uppercase block">
+              LUXE<span className="font-light text-[#D4AF37] ml-1">STORE</span>
+            </span>
+            <span className="text-[10px] tracking-[0.25em] text-[#8C827A] font-sans uppercase font-medium block mt-1">
+              ADMIN PORTAL
+            </span>
           </Link>
-        </div>
-      </nav>
 
-      {/* Admin Profile Footer */}
-      <div className="p-4 border-t border-[#222222] bg-[#141416] flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-[#27272A] border border-[#3F3F46] flex items-center justify-center text-white text-xs font-semibold shrink-0">
-            {currentUser?.fullName
-              ? currentUser.fullName.split(' ').map((n) => n[0]).slice(-2).join('').toUpperCase()
-              : 'TH'}
-          </div>
-          <div className="min-w-0">
-            <h4 className="text-xs font-semibold text-white truncate">
-              {currentUser?.fullName || 'Trần H. Nam'}
-            </h4>
-            <p className="text-[10px] text-[#A08870] uppercase tracking-wider">
-              {currentUser?.role === 'admin' ? 'Quản trị viên' : 'Quản trị viên'}
-            </p>
-          </div>
+          {/* Nút đóng drawer (chỉ mobile) */}
+          <button
+            onClick={onMobileClose}
+            className="lg:hidden p-2 -mr-2 text-[#A1A1AA] hover:text-white hover:bg-[#222224] rounded-xs transition-colors cursor-pointer"
+            aria-label="Đóng menu"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        <button
-          onClick={handleLogout}
-          title="Đăng xuất"
-          className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#222224] rounded-xs transition-colors cursor-pointer"
-        >
-          <LogOut size={15} />
-        </button>
-      </div>
-    </aside>
+        {/* Navigation Menu */}
+        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleTabClick(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-xs uppercase tracking-wider font-medium rounded-xs transition-all duration-200 text-left cursor-pointer ${
+                  isActive
+                    ? 'bg-[#222224] text-white font-semibold shadow-xs border-l-3 border-[#8A5B36]'
+                    : 'text-[#909099] hover:bg-[#1A1A1C] hover:text-[#ECECEC]'
+                }`}
+              >
+                <Icon
+                  size={16}
+                  className={isActive ? 'text-[#C9A87C]' : 'text-[#71717A]'}
+                />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+
+          <div className="pt-6 mt-6 border-t border-[#222222]">
+            <Link
+              to="/"
+              onClick={onMobileClose}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#71717A] hover:text-white hover:bg-[#1A1A1C] rounded-xs transition-colors"
+            >
+              <ArrowLeft size={15} />
+              <span>Về website bán hàng</span>
+            </Link>
+          </div>
+        </nav>
+
+        {/* Admin Profile Footer */}
+        <div className="p-4 border-t border-[#222222] bg-[#141416] flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-[#27272A] border border-[#3F3F46] flex items-center justify-center text-white text-xs font-semibold shrink-0">
+              {currentUser?.fullName
+                ? currentUser.fullName.split(' ').map((n) => n[0]).slice(-2).join('').toUpperCase()
+                : 'TH'}
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs font-semibold text-white truncate">
+                {currentUser?.fullName || 'Trần H. Nam'}
+              </h4>
+              <p className="text-[10px] text-[#A08870] uppercase tracking-wider">
+                {currentUser?.role === 'admin' ? 'Quản trị viên' : 'Quản trị viên'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            title="Đăng xuất"
+            className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#222224] rounded-xs transition-colors cursor-pointer"
+          >
+            <LogOut size={15} />
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 

@@ -123,21 +123,21 @@ const AdminOrdersView = () => {
         </div>
 
         {/* Search & Export */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1 min-w-0">
             <input
               type="text"
               placeholder="Tìm theo mã đơn, khách, SĐT..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-56 pl-8 pr-3 py-2 text-xs border border-gray-300 bg-white rounded-xs focus:outline-hidden focus:border-black"
+              className="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 bg-white rounded-xs focus:outline-hidden focus:border-black"
             />
             <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
           </div>
 
           <button
             onClick={() => dispatch(showToast({ message: 'Đang xuất danh sách đơn hàng ra file Excel...', type: 'info' }))}
-            className="px-3.5 py-2 border border-gray-300 hover:border-black bg-white text-gray-700 text-xs font-semibold rounded-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 border border-gray-300 hover:border-black bg-white text-gray-700 text-xs font-semibold rounded-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer w-full sm:w-auto"
           >
             <Download size={14} />
             <span>Xuất Excel</span>

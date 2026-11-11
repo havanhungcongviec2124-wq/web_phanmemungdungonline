@@ -324,9 +324,11 @@ const Header = () => {
               <Link to={currentUser ? "/account" : "/auth"} className="py-2 border-b border-gray-200/50">
                 {currentUser ? 'Tài Khoản & Đơn Hàng' : 'Đăng Nhập / Đăng Ký'}
               </Link>
-              <Link to="/admin" className="py-2 text-amber-700 flex items-center gap-2">
-                Quản Trị (Admin)
-              </Link>
+              {currentUser?.role === 'admin' && (
+                <Link to="/admin" className="py-2 text-amber-700 flex items-center gap-2">
+                  Quản Trị (Admin)
+                </Link>
+              )}
             </div>
           </div>
         )}

@@ -22,6 +22,8 @@ const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = paramTab || searchParams.get('tab') || 'dashboard';
   const [activeTab, setActiveTab] = useState(currentTab);
+  // Mobile: drawer sidebar (mở/đóng menu trên điện thoại)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const currentUser = useSelector(selectCurrentUser);
 
@@ -92,8 +94,13 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-[#FAF7F2] text-[#18181B] font-sans">
-      {/* 1. Left Dark Sidebar (Exact Figma) */}
-      <AdminSidebar activeTab={activeTab} setActiveTab={handleTabChange} />
+      {/* 1. Left Dark Sidebar — drawer trượt trên mobile, cố định trên desktop */}
+      <AdminSidebar
+        activeTab={activeTab}
+        setActiveTab={handleTabChange}
+        isMobileOpen={isSidebarOpen}
+        onMobileClose={() => setIsSidebarOpen(false)}
+      />
 
       {/* 2. Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -101,10 +108,11 @@ const AdminDashboard = () => {
         <AdminHeader
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
+          onMenuClick={() => setIsSidebarOpen(true)}
         />
 
         {/* Content Body */}
-        <main className="flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto space-y-6">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
           {/* Admin Demo Privileges Bar if not logged in as admin */}
           {currentUser?.role !== 'admin' && (
             <div className="bg-amber-50 border border-amber-200 p-4 rounded-xs flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
@@ -148,7 +156,7 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === 'settings' && (
-            <div className="bg-white border border-[#ECE7DF] rounded-xs shadow-xs p-8 space-y-6 animate-fade-in max-w-3xl">
+            <div className="bg-white border border-[#ECE7DF] rounded-xs shadow-xs p-5 sm:p-8 space-y-6 animate-fade-in max-w-3xl">
               <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
                 <div className="w-10 h-10 rounded-xs bg-emerald-50 text-emerald-700 flex items-center justify-center">
                   <Database size={20} />

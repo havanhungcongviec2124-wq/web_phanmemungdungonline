@@ -1,11 +1,11 @@
 import React from 'react';
-import { Search, Bell, Calendar, Plus, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Search, Bell, Calendar, Plus, RefreshCw, ShieldCheck, Menu } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { fetchProductsApi } from '../../redux/product/productApi';
 import { fetchOrdersApi } from '../../redux/order/orderApi';
 import { showToast } from '../../redux/ui/uiSlice';
 
-const AdminHeader = ({ title, subtitle, onActionClick, actionLabel, actionIcon: ActionIcon }) => {
+const AdminHeader = ({ title, subtitle, onActionClick, actionLabel, actionIcon: ActionIcon, onMenuClick }) => {
   const dispatch = useDispatch();
 
   const handleRefresh = () => {
@@ -15,25 +15,36 @@ const AdminHeader = ({ title, subtitle, onActionClick, actionLabel, actionIcon: 
   };
 
   return (
-    <header className="bg-white border-b border-[#ECE7DF] px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 z-20">
-      <div>
-        <h1 className="text-2xl font-serif text-[#18181B] tracking-tight">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-xs text-[#8C827A] mt-0.5">
-            {subtitle}
-          </p>
-        )}
+    <header className="bg-white border-b border-[#ECE7DF] px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 sticky top-0 z-20">
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Mobile: nút mở menu (drawer sidebar) */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 -ml-2 text-[#18181B] hover:bg-[#FAF7F2] rounded-xs transition-colors cursor-pointer"
+          aria-label="Mở menu quản trị"
+        >
+          <Menu size={20} />
+        </button>
+
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-serif text-[#18181B] tracking-tight truncate">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-xs text-[#8C827A] mt-0.5 line-clamp-2 sm:line-clamp-none">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
         {/* Global Search Bar */}
-        <div className="relative">
+        <div className="relative hidden sm:block">
           <input
             type="text"
             placeholder="Tìm kiếm hệ thống..."
-            className="w-48 sm:w-60 bg-[#FAF7F2] border border-[#E2DDD3] text-xs text-[#18181B] placeholder-gray-400 pl-8 pr-3 py-2 rounded-xs focus:outline-hidden focus:border-[#8A5B36] transition-colors"
+            className="w-40 xl:w-60 bg-[#FAF7F2] border border-[#E2DDD3] text-xs text-[#18181B] placeholder-gray-400 pl-8 pr-3 py-2 rounded-xs focus:outline-hidden focus:border-[#8A5B36] transition-colors"
           />
           <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
         </div>
