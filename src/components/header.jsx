@@ -77,9 +77,9 @@ const Header = () => {
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EAE6DF] transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 gap-4 sm:gap-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4 xl:gap-8">
             {/* Mobile hamburger button */}
-            <div className="flex items-center lg:hidden">
+            <div className="flex items-center xl:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 text-gray-800 hover:text-black focus:outline-none"
@@ -92,14 +92,14 @@ const Header = () => {
             {/* Left: Brand Logo */}
             <div className="shrink-0 flex items-center">
               <Link to="/" className="inline-block group whitespace-nowrap">
-                <span className="text-2xl sm:text-2xl lg:text-3xl font-extrabold tracking-[0.22em] text-[#18181B] font-serif uppercase">
-                  LUE<span className="font-light text-[#8A5B36] ml-1">GIFTS</span>
+                <span className="text-lg sm:text-2xl xl:text-3xl font-extrabold tracking-[0.12em] sm:tracking-[0.18em] xl:tracking-[0.2em] text-[#18181B] font-serif uppercase">
+                  LUE<span className="font-light text-[#8A5B36] ml-0.5 sm:ml-1">GIFTS</span>
                 </span>
               </Link>
             </div>
 
-            {/* Center: Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-5 xl:space-x-7 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.14em] text-gray-800 shrink-0">
+            {/* Center: Desktop Navigation (chỉ hiện ≥1280px — tổng độ rộng logo+nav+icons vừa khít max-w-7xl) */}
+            <nav className="hidden xl:flex items-center space-x-4 xl:space-x-5 text-[12px] font-semibold uppercase tracking-[0.12em] text-gray-800 shrink-0">
               <Link
                 to="/products?giftType=combo"
                 className="whitespace-nowrap hover:text-[#8A5B36] transition-colors py-2 flex items-center gap-1.5"
@@ -173,10 +173,10 @@ const Header = () => {
             </nav>
 
             {/* Right Action Icons */}
-            <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+            <div className="flex items-center space-x-1 sm:space-x-2 xl:space-x-3 shrink-0">
               {/* Search */}
               <div className="relative" ref={searchRef}>
-                <form onSubmit={handleSearchSubmit} className="relative hidden md:block">
+                <form onSubmit={handleSearchSubmit} className="relative hidden xl:block">
                   <input
                     type="text"
                     placeholder="Tìm kiếm sản phẩm..."
@@ -186,15 +186,15 @@ const Header = () => {
                       setIsSearchOpen(true);
                     }}
                     onFocus={() => setIsSearchOpen(true)}
-                    className="w-48 xl:w-60 pl-9 pr-3 py-2 bg-[#F6F4EE] border border-transparent focus:border-[#D0C8BB] text-xs text-gray-800 placeholder-gray-400 focus:outline-none transition-all"
+                    className="w-44 pl-9 pr-3 py-2 bg-[#F6F4EE] border border-transparent focus:border-[#D0C8BB] text-xs text-gray-800 placeholder-gray-400 focus:outline-none transition-all"
                   />
                   <Search size={15} className="absolute left-3 top-2.5 text-gray-400 pointer-events-none" />
                 </form>
 
-                {/* Mobile Search Icon */}
+                {/* Search Icon (md–xl): mở menu chứa ô tìm kiếm. Trên mobile nhỏ (<sm) dùng ô tìm kiếm trong menu hamburger */}
                 <button
-                  onClick={() => setIsSearchOpen(!isSearchOpen)}
-                  className="md:hidden p-2 text-gray-700 hover:text-black"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="hidden sm:block xl:hidden p-1.5 sm:p-2 text-gray-700 hover:text-black"
                   aria-label="Tìm kiếm"
                 >
                   <Search size={20} />
@@ -202,7 +202,7 @@ const Header = () => {
 
                 {/* Search Results Dropdown */}
                 {isSearchOpen && searchQuery.trim().length > 0 && (
-                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-[#E6E1D8] shadow-2xl p-4 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] sm:w-96 bg-white border border-[#E6E1D8] shadow-2xl p-4 z-50">
                     <div className="text-[11px] font-bold tracking-wider text-gray-400 uppercase mb-3 flex justify-between">
                       <span>Kết quả gợi ý ({searchResults.length})</span>
                       <button onClick={() => setIsSearchOpen(false)} className="text-gray-400 hover:text-black">
@@ -258,7 +258,7 @@ const Header = () => {
               {/* Account Icon */}
               <Link
                 to={currentUser ? "/account" : "/auth"}
-                className="p-2 text-gray-700 hover:text-black transition-colors"
+                className="p-1.5 sm:p-2 text-gray-700 hover:text-black transition-colors"
                 title={currentUser ? `Tài khoản (${currentUser.fullName})` : "Đăng nhập / Đăng ký"}
               >
                 <User size={20} />
@@ -267,7 +267,7 @@ const Header = () => {
               {/* Wishlist Icon */}
               <Link
                 to="/account?tab=wishlist"
-                className="relative p-2 text-gray-700 hover:text-black transition-colors"
+                className="relative p-1.5 sm:p-2 text-gray-700 hover:text-black transition-colors"
                 title="Yêu thích"
               >
                 <Heart size={20} />
@@ -281,7 +281,7 @@ const Header = () => {
               {/* Cart Icon */}
               <button
                 onClick={() => dispatch(setDrawerOpen(true))}
-                className="relative p-2 text-gray-700 hover:text-black transition-colors"
+                className="relative p-1.5 sm:p-2 text-gray-700 hover:text-black transition-colors"
                 aria-label="Giỏ hàng"
               >
                 <ShoppingBag size={20} />
@@ -295,9 +295,9 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile / Tablet Menu (đến 1280px) */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-[#ECE7DF] bg-[#FAF9F6] px-4 py-6 space-y-4">
+          <div className="xl:hidden border-t border-[#ECE7DF] bg-[#FAF9F6] px-4 py-6 space-y-4">
             <form onSubmit={handleSearchSubmit} className="relative mb-4">
               <input
                 type="text"
