@@ -20,6 +20,10 @@
     "react-router-dom": "^7.18.4",
     "tailwindcss": "^4.3.3"
   },
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@rolldown/plugin-babel": "^0.2.3",
