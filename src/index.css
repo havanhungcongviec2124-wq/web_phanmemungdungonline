@@ -11,6 +11,12 @@
     color: #1a1a1a;
     background-color: #fbfbf9;
     overflow-x: hidden;
+    /* Chặn double-tap zoom trên mobile (vẫn cuộn và bấm bình thường) */
+    touch-action: manipulation;
+  }
+
+  html {
+    touch-action: manipulation;
   }
 
   h1, h2, h3, .font-editorial {
