@@ -93,7 +93,7 @@ const Header = () => {
             <div className="shrink-0 flex items-center">
               <Link to="/" className="inline-block group whitespace-nowrap">
                 <span className="text-2xl sm:text-2xl lg:text-3xl font-extrabold tracking-[0.22em] text-[#18181B] font-serif uppercase">
-                  LUXE<span className="font-light text-[#8A5B36] ml-1">GIFTS</span>
+                  LUE<span className="font-light text-[#8A5B36] ml-1">GIFTS</span>
                 </span>
               </Link>
             </div>
